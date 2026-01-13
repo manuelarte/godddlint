@@ -1,0 +1,171 @@
+---
+version: "2"
+
+formatters:
+  enable:
+    # keep-sorted start
+    - gci
+    - gofmt
+    - gofumpt
+    # keep-sorted end
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+    gofmt:
+      simplify: true
+      rewrite-rules:
+        - pattern: "interface{}"
+          replacement: "any"
+    gofumpt:
+      extra-rules: true
+
+linters:
+  default: all
+  disable:
+    # keep-sorted start
+    - decorder  # If applicable, to be checked in code reviews.
+    - dupl  # Too many false positives.
+    - err113  # This leads to lots of unnecessary allocations and boilerplate.
+    - errchkjson  # No json.
+    - exhaustruct  # If applicable, to be checked in code reviews.
+    - forcetypeassert  # Used in a different linter
+    - ginkgolinter # Related to Ginkgo.
+    - goheader  # No need of copyright headers.
+    - gomodguard  # Not needed for a linter
+    - gosmopolitan  # No i18n.
+    - importas  # No need of aliasing imports.
+    - inamedparam  # Not important.
+    - ireturn  # No need for this linter here.
+    - noinlineerr  # I prefer inline errors.
+    - promlinter # Related to prometheus.
+    - rowserrcheck # Related to SQL.
+    - spancheck # Related to OpenTelemetry.
+    - sqlclosecheck # Related to SQL.
+    - tagliatelle  # No need for tags.
+    - testpackage  # We are testing using google tools.
+    - varnamelen  # If applicable, to be checked in a code review.
+    - wsl  # Deprecated, using wsl_v5
+    - zerologlint  # Not using zerolog.
+    # keep-sorted end
+
+  settings:
+    cyclop:
+      max-complexity: 30
+      package-average: 10
+    depguard:
+      rules:
+        deprecated:
+          files:
+            - $all
+          deny:
+            - pkg: github.com/golang/protobuf
+              desc: Use google.golang.org/protobuf instead, see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules
+            - pkg: github.com/satori/go.uuid
+              desc: Use github.com/google/uuid instead, satori's package is not maintained
+            - pkg: github.com/gofrs/uuid$
+              desc: Use github.com/gofrs/uuid/v5 or later, it was not a go module before v5
+        non-main files:
+          files:
+            - "!**/main.go"
+          deny:
+            - pkg: log$
+              desc: Use log/slog instead, see https://go.dev/blog/slog
+        non-test files:
+          files:
+            - "!$test"
+          deny:
+            - pkg: math/rand$
+              desc: Use math/rand/v2 instead, see https://go.dev/blog/randv2
+    errcheck:
+      check-type-assertions: true
+    exhaustive:
+      check:
+        - switch
+        - map
+    exhaustruct:
+      exclude:
+        - ^os/exec.Cmd$
+        - ^reflect.StructField$
+    funlen:
+      lines: -1
+      statements: 50
+      ignore-comments: true
+    gochecksumtype:
+      default-signifies-exhaustive: false
+    gocognit:
+      min-complexity: 20
+    gocritic:
+      settings:
+        captLocal:
+          paramsOnly: false
+        underef:
+          skipRecvDeref: false
+    godox:
+      keywords:
+        - FIXME
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+      settings:
+        shadow:
+          strict: true
+    inamedparam:
+      skip-single-param: true
+    mnd:
+      ignored-functions:
+        - args.Error
+        - flag.Arg
+        - flag.Duration.*
+        - flag.Float.*
+        - flag.Int.*
+        - flag.Uint.*
+        - os.Chmod
+        - os.Mkdir.*
+        - os.OpenFile
+        - os.WriteFile
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-no-explanation:
+        - funlen
+        - gocognit
+        - lll
+    perfsprint:
+      strconcat: false
+    reassign:
+      patterns:
+        - .*
+    revive:
+      rules:
+        - name: filename-format
+          arguments:
+            - ^[a-z][_a-z0-9]*.go$
+        - name: var-naming # badPackageNames not working
+    sloglint:
+      no-global: all
+      context: scope
+    tagalign:
+      align: false
+    usetesting:
+      os-temp-dir: true
+
+  exclusions:
+    presets:
+      - comments
+      - common-false-positives
+      - std-error-handling
+    rules:
+      - linters:
+          - errcheck
+          - funlen
+          - goconst
+          - gosec
+        path: _test\.go
+
+issues:
+  max-same-issues: 0
+  max-issues-per-linter: 0

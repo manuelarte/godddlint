@@ -1,0 +1,12 @@
+---
+name: commitlint
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ahmadnassri/action-commit-lint@v2

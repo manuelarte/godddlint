@@ -1,0 +1,76 @@
+---
+name: PR checks
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  # Check if there is any dirty change for go mod tidy
+  go-mod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+      - name: Check go mod
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod
+          git diff --exit-code go.sum
+  govulncheck:
+    runs-on: ubuntu-latest
+    name: Run govulncheck
+    steps:
+      - uses: actions/checkout@v6
+      - id: govulncheck
+        uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: oldstable
+          go-package: ./...
+  golangci:
+    name: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go: [oldstable, stable]
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go }}
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.7
+
+  spell:
+    name: "Spell check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          check_filenames: true
+          check_hidden: true
+      - name: Check spelling of entire workspace
+        uses: crate-ci/typos@v1
+
+  filelint:
+    name: filelint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DavidAnson/markdownlint-cli2-action@v22
+        with:
+          globs: '**/*.md'
+      - uses: karancode/yamllint-github-action@master
+        with:
+          yamllint_comment: true
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
