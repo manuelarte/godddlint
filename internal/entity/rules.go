@@ -12,6 +12,7 @@ import (
 var _ model.Rule = new(pointerReceivers)
 
 type (
+	// Rule that checks that Entities use pointer receivers.
 	pointerReceivers struct{}
 )
 

@@ -15,8 +15,10 @@ var (
 )
 
 type (
+	// Rule that checks that value objects use non pointer receivers.
 	nonPointerReceivers struct{}
-	immutable           struct{}
+	// Rule that checks that value objects have constructor(s) and unexported fields.
+	immutable struct{}
 )
 
 func (r nonPointerReceivers) Apply(d model.Definition) []analysis.Diagnostic {
