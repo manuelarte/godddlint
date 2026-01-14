@@ -1,4 +1,4 @@
-package valueObject
+package valueobject
 
 import "go/ast"
 

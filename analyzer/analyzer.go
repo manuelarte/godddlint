@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
 
-	"github.com/manuelarte/godddlint/internal/valueObject"
+	"github.com/manuelarte/godddlint/internal/valueobject"
 )
 
 func New() *analysis.Analyzer {
@@ -25,6 +25,7 @@ func New() *analysis.Analyzer {
 
 type godddlint struct{}
 
+//nolint:gocognit // Refactor later
 func (g godddlint) run(pass *analysis.Pass) (any, error) {
 	insp, found := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	if !found {
@@ -38,7 +39,9 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 		(*ast.GenDecl)(nil),
 	}
 
-	var valueObjectCheckers []valueObject.Checker
+	valueObjectCheckers := make(map[string]valueobject.Checker)
+
+	var funcDecls []*ast.FuncDecl
 
 	insp.Preorder(nodeFilter, func(n ast.Node) {
 		switch n := n.(type) {
@@ -46,27 +49,32 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 			// TODO
 
 		case *ast.FuncDecl:
-			// TODO
+			if n.Recv != nil && len(n.Recv.List) == 1 {
+				funcDecls = append(funcDecls, n)
+			}
 
 		case *ast.GenDecl:
 			if n.Tok != token.TYPE {
 				return
 			}
+
 			for _, spec := range n.Specs {
 				typeSpec, ok := spec.(*ast.TypeSpec)
 				if !ok {
 					continue
 				}
+
 				doc := typeSpec.Doc
 				if doc == nil {
 					doc = n.Doc
 				}
-				checker, ok := valueObject.New(typeSpec, doc)
+
+				checker, ok := valueobject.New(typeSpec, doc)
 				if !ok {
 					continue
 				}
 
-				valueObjectCheckers = append(valueObjectCheckers, checker)
+				valueObjectCheckers[typeSpec.Name.Name] = checker
 			}
 		}
 	})
