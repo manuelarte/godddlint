@@ -1,8 +1,11 @@
 package analyzer
 
 import (
+	"go/ast"
+
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
+	"golang.org/x/tools/go/ast/inspector"
 )
 
 func New() *analysis.Analyzer {
@@ -20,6 +23,31 @@ func New() *analysis.Analyzer {
 type godddlint struct{}
 
 func (g godddlint) run(pass *analysis.Pass) (any, error) {
-	//nolint:nilnil // nothing to do here
+	insp, found := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	if !found {
+		//nolint:nilnil // impossible case.
+		return nil, nil
+	}
+
+	nodeFilter := []ast.Node{
+		(*ast.File)(nil),
+		(*ast.FuncDecl)(nil),
+		(*ast.TypeSpec)(nil),
+	}
+
+	insp.Preorder(nodeFilter, func(n ast.Node) {
+		switch n.(type) {
+		case *ast.File:
+			// TODO
+
+		case *ast.FuncDecl:
+			// TODO
+
+		case *ast.TypeSpec:
+			// TODO
+		}
+	})
+
+	//nolint:nilnil //any, error
 	return nil, nil
 }
