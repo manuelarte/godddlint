@@ -3,6 +3,8 @@ package valueobject
 import (
 	"go/ast"
 	"slices"
+
+	"golang.org/x/tools/go/analysis"
 )
 
 type (
@@ -13,23 +15,25 @@ type (
 	}
 
 	Checker struct {
-		rules []Rule
+		rules []rule
 	}
 )
 
 func NewChecker() Checker {
 	return Checker{
-		rules: []Rule{
-			NonPointerReceivers{},
+		rules: []rule{
+			nonPointerReceivers{},
 		},
 	}
 }
 
-func (c Checker) Check(definition Definition) {
-	for _, rule := range c.rules {
-		// TODO diagnosis error too
-		rule.Apply(definition)
+func (c Checker) Check(definition Definition) []analysis.Diagnostic {
+	allDiag := make([]analysis.Diagnostic, 0)
+	for _, r := range c.rules {
+		allDiag = append(allDiag, r.Apply(definition)...)
 	}
+
+	return allDiag
 }
 
 // NewDefinition creates a value object checker if the type contains the comment //godddlint:valueObject.

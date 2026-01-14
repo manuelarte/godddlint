@@ -5,18 +5,18 @@ type Point struct {
 	x, y int
 }
 
-func (p *Point) X() int {
+func (p *Point) X() int { // want `VO001: Non Pointer Receivers`
 	return p.x
 }
 
-func (p *Point) Y() int {
+func (p *Point) Y() int { // want `VO001: Non Pointer Receivers`
 	return p.y
 }
 
 //godddlint:valueObject
 type Username string
 
-func (u *Username) String() string {
+func (u *Username) String() string { // want `VO001: Non Pointer Receivers`
 	return string(*u)
 }
 
@@ -42,15 +42,15 @@ type (
 	}
 )
 
-func (p *Point2) X() int {
+func (p *Point2) X() int { // want `VO001: Non Pointer Receivers`
 	return p.x
 }
 
-func (p *Point2) Y() int {
+func (p *Point2) Y() int { // want `VO001: Non Pointer Receivers`
 	return p.y
 }
 
-func (u *Username2) String() string {
+func (u *Username2) String() string { // want `VO001: Non Pointer Receivers`
 	return string(*u)
 }
 

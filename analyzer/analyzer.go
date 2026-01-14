@@ -95,7 +95,10 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 	}
 
 	for _, voDefinition := range valueObjectDefinitions {
-		valueObjectChecker.Check(*voDefinition)
+		diags := valueObjectChecker.Check(*voDefinition)
+		for _, diag := range diags {
+			pass.Report(diag)
+		}
 	}
 
 	//nolint:nilnil //any, error
