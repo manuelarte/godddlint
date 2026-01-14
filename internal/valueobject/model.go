@@ -11,7 +11,10 @@ type (
 	Definition struct {
 		TypeSpec *ast.TypeSpec
 		Doc      *ast.CommentGroup
-		Methods  []*ast.FuncDecl
+		// Constructors are functions that return either the value object or the value object and an error.
+		Constructors []*ast.FuncDecl
+		// Methods are the methods for this value object.
+		Methods []*ast.FuncDecl
 	}
 
 	Checker struct {
@@ -42,6 +45,10 @@ func NewDefinition(spec *ast.TypeSpec, doc *ast.CommentGroup) (*Definition, bool
 		TypeSpec: spec,
 		Doc:      doc,
 	}, commentContainsValueObject(doc)
+}
+
+func (d *Definition) AddConstructor(constructor *ast.FuncDecl) {
+	d.Constructors = append(d.Constructors, constructor)
 }
 
 func (d *Definition) AddMethod(method *ast.FuncDecl) {

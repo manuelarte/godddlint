@@ -34,7 +34,6 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 	}
 
 	nodeFilter := []ast.Node{
-		(*ast.File)(nil),
 		(*ast.FuncDecl)(nil),
 		(*ast.GenDecl)(nil),
 	}
@@ -42,16 +41,24 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 	valueObjectChecker := valueobject.NewChecker()
 	valueObjectDefinitions := make(map[string]*valueobject.Definition)
 
-	var funcDecls []*ast.FuncDecl
+	possibleConstructorDecls := make([]*ast.FuncDecl, 0)
+	methodsDecls := make([]*ast.FuncDecl, 0)
 
 	insp.Preorder(nodeFilter, func(n ast.Node) {
 		switch n := n.(type) {
-		case *ast.File:
-			// TODO
-
 		case *ast.FuncDecl:
+			if n.Recv == nil {
+				if potentialConstructor(n) {
+					possibleConstructorDecls = append(possibleConstructorDecls, n)
+
+					return
+				}
+			}
+
 			if n.Recv != nil && len(n.Recv.List) == 1 {
-				funcDecls = append(funcDecls, n)
+				methodsDecls = append(methodsDecls, n)
+
+				return
 			}
 
 		case *ast.GenDecl:
@@ -80,8 +87,22 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 		}
 	})
 
-	for _, funcDecl := range funcDecls {
-		rcvName, hasRcvName := getRcvName(funcDecl.Recv.List[0].Type)
+	for _, possibleConstructor := range possibleConstructorDecls {
+		structIdent, isIdent := possibleConstructor.Type.Results.List[0].Type.(*ast.Ident)
+		if !isIdent {
+			continue
+		}
+
+		definition, ok := valueObjectDefinitions[structIdent.Name]
+		if !ok {
+			continue
+		}
+
+		definition.AddConstructor(possibleConstructor)
+	}
+
+	for _, methodDecl := range methodsDecls {
+		rcvName, hasRcvName := getRcvName(methodDecl.Recv.List[0].Type)
 		if !hasRcvName {
 			continue
 		}
@@ -91,7 +112,7 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 			continue
 		}
 
-		definition.AddMethod(funcDecl)
+		definition.AddMethod(methodDecl)
 	}
 
 	for _, voDefinition := range valueObjectDefinitions {
@@ -103,15 +124,4 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 
 	//nolint:nilnil //any, error
 	return nil, nil
-}
-
-func getRcvName(expr ast.Expr) (string, bool) {
-	switch expr := expr.(type) {
-	case *ast.Ident:
-		return expr.Name, true
-	case *ast.StarExpr:
-		return getRcvName(expr.X)
-	default:
-		return "", false
-	}
 }
