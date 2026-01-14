@@ -26,6 +26,7 @@ func NewChecker() Checker {
 	return Checker{
 		rules: []rule{
 			nonPointerReceivers{},
+			internalFieldsUnexported{},
 		},
 	}
 }

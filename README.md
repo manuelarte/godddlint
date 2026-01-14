@@ -38,7 +38,7 @@ type Point struct {
 func (c *Point) ...
 ```
 
-##### VOX001: Internal Fields Exported
+##### VOX001: Immutable
 
 A value object makes sense when the properties are immutable.
 This rule checks that a value object can only be created using a constructor that

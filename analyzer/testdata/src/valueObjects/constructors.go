@@ -1,7 +1,7 @@
 package simple
 
 //godddlint:valueObject
-type PointWithoutConstructor struct {
+type PointWithoutConstructor struct { // want `VOX001: Immutable`
 	x, y int
 }
 

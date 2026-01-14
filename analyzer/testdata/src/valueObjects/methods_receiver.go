@@ -5,6 +5,10 @@ type Point struct {
 	x, y int
 }
 
+func NewPoint() Point {
+	return Point{}
+}
+
 func (p *Point) X() int { // want `VO001: Non Pointer Receivers`
 	return p.x
 }
@@ -41,6 +45,10 @@ type (
 		Name string
 	}
 )
+
+func NewPoint2() Point2 {
+	return Point2{}
+}
 
 func (p *Point2) X() int { // want `VO001: Non Pointer Receivers`
 	return p.x

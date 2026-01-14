@@ -19,7 +19,8 @@ type (
 		metadata() ruleMetadata
 	}
 
-	nonPointerReceivers struct{}
+	nonPointerReceivers      struct{}
+	internalFieldsUnexported struct{}
 )
 
 func (r nonPointerReceivers) Apply(d Definition) []analysis.Diagnostic {
@@ -46,5 +47,47 @@ func (r nonPointerReceivers) metadata() ruleMetadata {
 	return ruleMetadata{
 		Name:        "VO001",
 		Description: "Non Pointer Receivers",
+	}
+}
+
+func (r internalFieldsUnexported) Apply(d Definition) []analysis.Diagnostic {
+	allDiag := make([]analysis.Diagnostic, 0)
+
+	metadata := r.metadata()
+	message := fmt.Sprintf("%s: %s", metadata.Name, metadata.Description)
+
+	if st, ok := d.TypeSpec.Type.(*ast.StructType); ok {
+		if len(d.Constructors) == 0 {
+			diag := analysis.Diagnostic{
+				Pos:     d.TypeSpec.Pos(),
+				End:     d.TypeSpec.End(),
+				Message: message,
+				URL:     metadata.URL,
+			}
+			allDiag = append(allDiag, diag)
+		}
+
+		for _, f := range st.Fields.List {
+			for _, n := range f.Names {
+				if n.IsExported() {
+					diag := analysis.Diagnostic{
+						Pos:     n.Pos(),
+						End:     n.End(),
+						Message: message,
+						URL:     metadata.URL,
+					}
+					allDiag = append(allDiag, diag)
+				}
+			}
+		}
+	}
+
+	return allDiag
+}
+
+func (r internalFieldsUnexported) metadata() ruleMetadata {
+	return ruleMetadata{
+		Name:        "VOX001",
+		Description: "Immutable",
 	}
 }
