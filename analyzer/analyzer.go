@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"go/ast"
+	"go/token"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -34,7 +35,7 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 	nodeFilter := []ast.Node{
 		(*ast.File)(nil),
 		(*ast.FuncDecl)(nil),
-		(*ast.TypeSpec)(nil),
+		(*ast.GenDecl)(nil),
 	}
 
 	var valueObjectCheckers []valueObject.Checker
@@ -47,13 +48,26 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 		case *ast.FuncDecl:
 			// TODO
 
-		case *ast.TypeSpec:
-			checker, ok := valueObject.New(n)
-			if !ok {
+		case *ast.GenDecl:
+			if n.Tok != token.TYPE {
 				return
 			}
+			for _, spec := range n.Specs {
+				typeSpec, ok := spec.(*ast.TypeSpec)
+				if !ok {
+					continue
+				}
+				doc := typeSpec.Doc
+				if doc == nil {
+					doc = n.Doc
+				}
+				checker, ok := valueObject.New(typeSpec, doc)
+				if !ok {
+					continue
+				}
 
-			valueObjectCheckers = append(valueObjectCheckers, checker)
+				valueObjectCheckers = append(valueObjectCheckers, checker)
+			}
 		}
 	})
 
