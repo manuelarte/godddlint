@@ -67,7 +67,7 @@ Business processes that can return an error needs to return a meaningful error, 
 
 ```go
 //godddlint:entity
-type Name struct {
+type User struct {
     id                  UserID
     name                Name
     address             Address
