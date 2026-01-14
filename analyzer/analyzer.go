@@ -3,10 +3,11 @@ package analyzer
 import (
 	"go/ast"
 
-	"github.com/manuelarte/go-template/internal/valueObject"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
+
+	"github.com/manuelarte/go-template/internal/valueObject"
 )
 
 func New() *analysis.Analyzer {
@@ -51,6 +52,7 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 			if !ok {
 				return
 			}
+
 			valueObjectCheckers = append(valueObjectCheckers, checker)
 		}
 	})
