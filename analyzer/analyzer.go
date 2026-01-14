@@ -39,7 +39,8 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 		(*ast.GenDecl)(nil),
 	}
 
-	valueObjectCheckers := make(map[string]valueobject.Checker)
+	valueObjectChecker := valueobject.NewChecker()
+	valueObjectDefinitions := make(map[string]*valueobject.Definition)
 
 	var funcDecls []*ast.FuncDecl
 
@@ -69,16 +70,45 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 					doc = n.Doc
 				}
 
-				checker, ok := valueobject.New(typeSpec, doc)
+				checker, ok := valueobject.NewDefinition(typeSpec, doc)
 				if !ok {
 					continue
 				}
 
-				valueObjectCheckers[typeSpec.Name.Name] = checker
+				valueObjectDefinitions[typeSpec.Name.Name] = checker
 			}
 		}
 	})
 
+	for _, funcDecl := range funcDecls {
+		rcvName, hasRcvName := getRcvName(funcDecl.Recv.List[0].Type)
+		if !hasRcvName {
+			continue
+		}
+
+		definition, ok := valueObjectDefinitions[rcvName]
+		if !ok {
+			continue
+		}
+
+		definition.AddMethod(funcDecl)
+	}
+
+	for _, voDefinition := range valueObjectDefinitions {
+		valueObjectChecker.Check(*voDefinition)
+	}
+
 	//nolint:nilnil //any, error
 	return nil, nil
+}
+
+func getRcvName(expr ast.Expr) (string, bool) {
+	switch expr := expr.(type) {
+	case *ast.Ident:
+		return expr.Name, true
+	case *ast.StarExpr:
+		return getRcvName(expr.X)
+	default:
+		return "", false
+	}
 }
