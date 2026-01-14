@@ -3,6 +3,7 @@ package analyzer
 import (
 	"go/ast"
 
+	"github.com/manuelarte/go-template/internal/valueObject"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
@@ -35,8 +36,10 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 		(*ast.TypeSpec)(nil),
 	}
 
+	var valueObjectCheckers []valueObject.Checker
+
 	insp.Preorder(nodeFilter, func(n ast.Node) {
-		switch n.(type) {
+		switch n := n.(type) {
 		case *ast.File:
 			// TODO
 
@@ -44,7 +47,11 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 			// TODO
 
 		case *ast.TypeSpec:
-			// TODO
+			checker, ok := valueObject.New(n)
+			if !ok {
+				return
+			}
+			valueObjectCheckers = append(valueObjectCheckers, checker)
 		}
 	})
 
