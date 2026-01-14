@@ -20,11 +20,27 @@ godddlint ./...
 
 ## 🚀 Features
 
+### Entities
+
+An [entity][entity] is an object defined not by its attributes, but its identity.
+
+#### Entities Rules
+
+##### E001: ID is the first embedded field
+
+##### E002: Pointer Receivers
+
+##### E003: Custom Types Over Primitives
+
+##### E004: Using Custom Errors
+
+##### E005: Unexported Fields
+
 ### Value Objects
 
 [Value Objects][value-object] are objects that are equal due to the value of their properties.
 
-#### Rules
+#### Value Objects Rules
 
 ##### VO001: Non Pointer Receivers
 
@@ -61,4 +77,5 @@ func New(x, y int) Point {
 When using a `map` or a `slice` inside a value object, we should prevent that it gets mutated.
 To avoid that, you can use *Defensive Copy*.
 
-[value-object]: https://martinfowler.com/bliki/ValueObject.html
+[entity]: https://en.wikipedia.org/wiki/Entity#In_computer_science
+[value-object]: https://en.wikipedia.org/wiki/Value_object
