@@ -8,7 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
 
-	"github.com/manuelarte/go-template/internal/valueObject"
+	"github.com/manuelarte/godddlint/internal/valueObject"
 )
 
 func New() *analysis.Analyzer {
