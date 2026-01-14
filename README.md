@@ -35,8 +35,9 @@ An Entity can mutate, so then an internal mutation is allowed.
 ```go
 //godddlint:entity
 type User struct {
-   name    Name
-   address Address
+ id      UserID
+    name    Name
+    address Address
 }
 
 // entities must have a pointer receiver
@@ -45,16 +46,18 @@ func (c *User) ...
 
 ##### E003: Custom Types Over Primitives
 
-An Entity field needs to have more meaning that just a primitive value.
+An Entity field needs to have more meaning than just a primitive value.
 
 ```go
+type UserID int
 type Name string
 type Address string
 
 //godddlint:entity
 type User struct {
-   name    Name
-   address Address
+    id      UserID
+    name    Name
+    address Address
 }
 ```
 
@@ -65,9 +68,10 @@ Business processes that can return an error needs to return a meaningful error, 
 ```go
 //godddlint:entity
 type Name struct {
-    name    Name
-    address Address
-    numberOfTimesMoved int
+    id                  UserID
+    name                Name
+    address             Address
+    numberOfTimesMoved  int
 }
 
 func (c *User) UserMoved(na Address) error {
@@ -87,6 +91,7 @@ Entity fields need to be mutated by a method that indicates a business process. 
 ```go
 //godddlint:entity
 type User struct {
+    id      UserID
     name    Name
     address Address
 }
