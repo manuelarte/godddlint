@@ -8,6 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
 
+	"github.com/manuelarte/godddlint/internal/model"
 	"github.com/manuelarte/godddlint/internal/valueobject"
 )
 
@@ -39,7 +40,7 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 	}
 
 	valueObjectChecker := valueobject.NewChecker()
-	valueObjectDefinitions := make(map[string]*valueobject.Definition)
+	valueObjectDefinitions := make(map[string]*model.Definition)
 
 	possibleConstructorDecls := make([]*ast.FuncDecl, 0)
 	methodsDecls := make([]*ast.FuncDecl, 0)

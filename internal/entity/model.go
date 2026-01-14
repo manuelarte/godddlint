@@ -1,4 +1,4 @@
-package valueobject
+package entity
 
 import (
 	"go/ast"
@@ -9,12 +9,11 @@ import (
 
 func NewChecker() model.Checker {
 	return model.NewChecker([]model.Rule{
-		nonPointerReceivers{},
-		immutable{},
+		pointerReceivers{},
 	})
 }
 
-// NewDefinition creates a value object definition if the type contains the comment //godddlint:valueObject.
+// NewDefinition creates an entity definition if the type contains the comment //godddlint:entity.
 func NewDefinition(spec *ast.TypeSpec, doc *ast.CommentGroup) (*model.Definition, bool) {
 	return &model.Definition{
 		TypeSpec: spec,
@@ -24,6 +23,6 @@ func NewDefinition(spec *ast.TypeSpec, doc *ast.CommentGroup) (*model.Definition
 
 func commentContainsValueObject(doc *ast.CommentGroup) bool {
 	return doc != nil && slices.ContainsFunc(doc.List, func(c *ast.Comment) bool {
-		return c.Text == "//godddlint:valueObject"
+		return c.Text == "//godddlint:entity"
 	})
 }

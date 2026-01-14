@@ -5,30 +5,26 @@ import (
 	"go/ast"
 
 	"golang.org/x/tools/go/analysis"
+
+	"github.com/manuelarte/godddlint/internal/model"
 )
 
-var _ rule = new(nonPointerReceivers)
+var (
+	_ model.Rule = new(nonPointerReceivers)
+	_ model.Rule = new(immutable)
+)
 
 type (
-	ruleMetadata struct {
-		Name, Description, URL string
-	}
-
-	rule interface {
-		Apply(definition Definition) []analysis.Diagnostic
-		metadata() ruleMetadata
-	}
-
-	nonPointerReceivers      struct{}
-	internalFieldsUnexported struct{}
+	nonPointerReceivers struct{}
+	immutable           struct{}
 )
 
-func (r nonPointerReceivers) Apply(d Definition) []analysis.Diagnostic {
+func (r nonPointerReceivers) Apply(d model.Definition) []analysis.Diagnostic {
 	allDiag := make([]analysis.Diagnostic, 0)
 
 	for _, m := range d.Methods {
 		if se, ok := m.Recv.List[0].Type.(*ast.StarExpr); ok {
-			metadata := r.metadata()
+			metadata := r.Metadata()
 			message := fmt.Sprintf("%s: %s", metadata.Name, metadata.Description)
 			diag := analysis.Diagnostic{
 				Pos:     se.Star,
@@ -43,17 +39,17 @@ func (r nonPointerReceivers) Apply(d Definition) []analysis.Diagnostic {
 	return allDiag
 }
 
-func (r nonPointerReceivers) metadata() ruleMetadata {
-	return ruleMetadata{
+func (r nonPointerReceivers) Metadata() model.RuleMetadata {
+	return model.RuleMetadata{
 		Name:        "VO001",
 		Description: "Non Pointer Receivers",
 	}
 }
 
-func (r internalFieldsUnexported) Apply(d Definition) []analysis.Diagnostic {
+func (r immutable) Apply(d model.Definition) []analysis.Diagnostic {
 	allDiag := make([]analysis.Diagnostic, 0)
 
-	metadata := r.metadata()
+	metadata := r.Metadata()
 	message := fmt.Sprintf("%s: %s", metadata.Name, metadata.Description)
 
 	if st, ok := d.TypeSpec.Type.(*ast.StructType); ok {
@@ -85,8 +81,8 @@ func (r internalFieldsUnexported) Apply(d Definition) []analysis.Diagnostic {
 	return allDiag
 }
 
-func (r internalFieldsUnexported) metadata() ruleMetadata {
-	return ruleMetadata{
+func (r immutable) Metadata() model.RuleMetadata {
+	return model.RuleMetadata{
 		Name:        "VOX001",
 		Description: "Immutable",
 	}
