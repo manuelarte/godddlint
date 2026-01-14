@@ -12,13 +12,19 @@ To install it, run:
 go install github.com/manuelarte/godddlint@latest
 ```
 
+To run it in your project:
+
+```bash
+godddlint ./...
+```
+
 ## 🚀 Features
 
 ### Value Objects
 
 [Value Objects][value-object] are objects that are equal due to the value of their properties.
 
-#### Checks
+#### Rules
 
 ##### VO001: Non Pointer Receivers
 
@@ -34,8 +40,9 @@ func (c *Point) ...
 
 ##### VOX001: A Value Object Without Constructor
 
-A value object makes sense when the properties are immutable. This rule checks that a value object
-can only be created using a constructor, that tries to prevent that developers mutate fields in the struct.
+A value object makes sense when the properties are immutable. 
+This rule checks that a value object can only be created using a constructor that 
+tries to prevent that developers mutate fields in the struct.
 
 ```go
 //godddlint:valueObject
@@ -51,6 +58,6 @@ func New(x, y int) Point {
 #### VOX002: Maps/Slices Not Defensive Copied
 
 When using a `map` or a `slice` inside a value object, we should prevent that it gets mutated.
-For that they should be defensive copied
+To avoid that, you can use *Defensive Copy*.
 
 [value-object]: https://martinfowler.com/bliki/ValueObject.html

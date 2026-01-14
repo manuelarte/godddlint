@@ -1,4 +1,4 @@
-module github.com/manuelarte/go-template
+module github.com/manuelarte/godddlint
 
 go 1.24.0
 
