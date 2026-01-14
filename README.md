@@ -30,11 +30,71 @@ An [entity][entity] is an object defined not by its attributes, but its identity
 
 ##### E002: Pointer Receivers
 
+An Entity can mutate, so then an internal mutation is allowed.
+
+```go
+//godddlint:entity
+type User struct {
+   name    Name
+   address Address
+}
+
+// entities must have a pointer receiver
+func (c *User) ...
+```
+
 ##### E003: Custom Types Over Primitives
+
+An Entity field needs to have more meaning that just a primitive value.
+
+```go
+type Name string
+type Address string
+
+//godddlint:entity
+type User struct {
+   name    Name
+   address Address
+}
+```
 
 ##### E004: Using Custom Errors
 
+Business processes that can return an error needs to return a meaningful error, not a generic one.
+
+```go
+//godddlint:entity
+type Name struct {
+    name    Name
+    address Address
+    numberOfTimesMoved int
+}
+
+func (c *User) UserMoved(na Address) error {
+ if numberOfTimesMoved >= 2 {
+   return NotAllowedToMoveError{}
+    }
+    numberOfTimesMoved++
+ c.address = na
+ return nil
+}
+```
+
 ##### E005: Unexported Fields
+
+Entity fields need to be mutated by a method that indicates a business process. Not by just changing the field.
+
+```go
+//godddlint:entity
+type User struct {
+    name    Name
+    address Address
+}
+
+func (c *User) UserMoved(na Address) {
+    c.address = na
+}
+```
 
 ### Value Objects
 
@@ -44,10 +104,12 @@ An [entity][entity] is an object defined not by its attributes, but its identity
 
 ##### VO001: Non Pointer Receivers
 
+A value object is assumed to be immutable, so then no internal mutation is allowed.
+
 ```go
 //godddlint:valueObject
 type Point struct {
- x, y int
+    x, y int
 }
 
 // valueObject must not have a pointer receiver
@@ -64,11 +126,11 @@ Also checks that all the fields are unexported.
 ```go
 //godddlint:valueObject
 type Point struct {
- x, y int
+    x, y int
 }
 
 func New(x, y int) Point {
- return Point{x: x, y: y}
+    return Point{x: x, y: y}
 }
 ```
 
