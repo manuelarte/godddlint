@@ -18,6 +18,10 @@ func TestAnalyzer(t *testing.T) {
 			desc:     "valueObjects",
 			patterns: "valueObjects",
 		},
+		{
+			desc:     "entities",
+			patterns: "entities",
+		},
 	}
 
 	for _, test := range testCases {

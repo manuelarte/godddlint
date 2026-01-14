@@ -21,18 +21,18 @@ type (
 	immutable struct{}
 )
 
-func (r nonPointerReceivers) Apply(d model.Definition) []analysis.Diagnostic {
+func (r nonPointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
 	allDiag := make([]analysis.Diagnostic, 0)
 
 	for _, m := range d.Methods {
 		if se, ok := m.Recv.List[0].Type.(*ast.StarExpr); ok {
 			metadata := r.Metadata()
-			message := fmt.Sprintf("%s: %s", metadata.Name, metadata.Description)
 			diag := analysis.Diagnostic{
-				Pos:     se.Star,
-				End:     se.End(),
-				Message: message,
-				URL:     metadata.URL,
+				Pos:      se.Star,
+				End:      se.End(),
+				Category: metadata.Name,
+				Message:  fmt.Sprintf("%s: Value Object's method using a pointer receiver", metadata.Code),
+				URL:      metadata.URL,
 			}
 			allDiag = append(allDiag, diag)
 		}
@@ -43,24 +43,24 @@ func (r nonPointerReceivers) Apply(d model.Definition) []analysis.Diagnostic {
 
 func (r nonPointerReceivers) Metadata() model.RuleMetadata {
 	return model.RuleMetadata{
-		Name:        "VO001",
-		Description: "Non Pointer Receivers",
+		Code: "VO001",
+		Name: "Non Pointer Receivers",
 	}
 }
 
-func (r immutable) Apply(d model.Definition) []analysis.Diagnostic {
+func (r immutable) Apply(d *model.Definition) []analysis.Diagnostic {
 	allDiag := make([]analysis.Diagnostic, 0)
 
 	metadata := r.Metadata()
-	message := fmt.Sprintf("%s: %s", metadata.Name, metadata.Description)
 
 	if st, ok := d.TypeSpec.Type.(*ast.StructType); ok {
 		if len(d.Constructors) == 0 {
 			diag := analysis.Diagnostic{
-				Pos:     d.TypeSpec.Pos(),
-				End:     d.TypeSpec.End(),
-				Message: message,
-				URL:     metadata.URL,
+				Pos:      d.TypeSpec.Pos(),
+				End:      d.TypeSpec.End(),
+				Category: metadata.Name,
+				Message:  fmt.Sprintf("%s: Constructor for Value Object not found", metadata.Code),
+				URL:      metadata.URL,
 			}
 			allDiag = append(allDiag, diag)
 		}
@@ -71,7 +71,7 @@ func (r immutable) Apply(d model.Definition) []analysis.Diagnostic {
 					diag := analysis.Diagnostic{
 						Pos:     n.Pos(),
 						End:     n.End(),
-						Message: message,
+						Message: fmt.Sprintf("%s: Value Object's field is exported", metadata.Code),
 						URL:     metadata.URL,
 					}
 					allDiag = append(allDiag, diag)
@@ -85,7 +85,7 @@ func (r immutable) Apply(d model.Definition) []analysis.Diagnostic {
 
 func (r immutable) Metadata() model.RuleMetadata {
 	return model.RuleMetadata{
-		Name:        "VOX001",
-		Description: "Immutable",
+		Code: "VOX001",
+		Name: "Immutable",
 	}
 }

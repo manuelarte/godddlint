@@ -21,11 +21,11 @@ type (
 	}
 
 	RuleMetadata struct {
-		Name, Description, URL string
+		Code, Name, URL string
 	}
 
 	Rule interface {
-		Apply(definition Definition) []analysis.Diagnostic
+		Apply(definition *Definition) []analysis.Diagnostic
 		Metadata() RuleMetadata
 	}
 )
@@ -36,7 +36,7 @@ func NewChecker(rules []Rule) Checker {
 	}
 }
 
-func (c Checker) Check(definition Definition) []analysis.Diagnostic {
+func (c Checker) Check(definition *Definition) []analysis.Diagnostic {
 	allDiag := make([]analysis.Diagnostic, 0)
 	for _, r := range c.rules {
 		allDiag = append(allDiag, r.Apply(definition)...)

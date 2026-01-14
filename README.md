@@ -36,8 +36,8 @@ An Entity can mutate, so then an internal mutation is allowed.
 //godddlint:entity
 type User struct {
  id      UserID
-    name    Name
-    address Address
+ name    Name
+ address Address
 }
 
 // entities must have a pointer receiver
@@ -70,17 +70,15 @@ Business processes that can return an error needs to return a meaningful error, 
 type User struct {
     id                  UserID
     name                Name
-    address             Address
-    numberOfTimesMoved  int
+    address             []Address
 }
 
 func (c *User) UserMoved(na Address) error {
- if numberOfTimesMoved >= 2 {
-   return NotAllowedToMoveError{}
+    if len(c.address) >= 2 {
+        return UserNotAllowedToMoveError{}
     }
-    numberOfTimesMoved++
- c.address = na
- return nil
+     c.address = append(c.address, na)
+     return nil
 }
 ```
 

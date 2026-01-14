@@ -162,6 +162,7 @@ linters:
       - std-error-handling
     rules:
       - linters:
+          - cyclop
           - errcheck
           - funlen
           - goconst

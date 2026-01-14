@@ -9,18 +9,18 @@ func NewPoint() Point {
 	return Point{}
 }
 
-func (p *Point) X() int { // want `VO001: Non Pointer Receivers`
+func (p *Point) X() int { // want `VO001: Value Object's method using a pointer receiver`
 	return p.x
 }
 
-func (p *Point) Y() int { // want `VO001: Non Pointer Receivers`
+func (p *Point) Y() int { // want `VO001: Value Object's method using a pointer receiver`
 	return p.y
 }
 
 //godddlint:valueObject
 type Username string
 
-func (u *Username) String() string { // want `VO001: Non Pointer Receivers`
+func (u *Username) String() string { // want `VO001: Value Object's method using a pointer receiver`
 	return string(*u)
 }
 
@@ -50,15 +50,15 @@ func NewPoint2() Point2 {
 	return Point2{}
 }
 
-func (p *Point2) X() int { // want `VO001: Non Pointer Receivers`
+func (p *Point2) X() int { // want `VO001: Value Object's method using a pointer receiver`
 	return p.x
 }
 
-func (p *Point2) Y() int { // want `VO001: Non Pointer Receivers`
+func (p *Point2) Y() int { // want `VO001: Value Object's method using a pointer receiver`
 	return p.y
 }
 
-func (u *Username2) String() string { // want `VO001: Non Pointer Receivers`
+func (u *Username2) String() string { // want `VO001: Value Object's method using a pointer receiver`
 	return string(*u)
 }
 

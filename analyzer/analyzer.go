@@ -8,6 +8,8 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
 
+	"github.com/manuelarte/godddlint/internal/astutils"
+	"github.com/manuelarte/godddlint/internal/entity"
 	"github.com/manuelarte/godddlint/internal/model"
 	"github.com/manuelarte/godddlint/internal/valueobject"
 )
@@ -42,6 +44,9 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 	valueObjectChecker := valueobject.NewChecker()
 	valueObjectDefinitions := make(map[string]*model.Definition)
 
+	entitiesChecker := entity.NewChecker()
+	entitiesDefinitions := make(map[string]*model.Definition)
+
 	possibleConstructorDecls := make([]*ast.FuncDecl, 0)
 	methodsDecls := make([]*ast.FuncDecl, 0)
 
@@ -49,7 +54,7 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 		switch n := n.(type) {
 		case *ast.FuncDecl:
 			if n.Recv == nil {
-				if potentialConstructor(n) {
+				if astutils.IsPotentialConstructor(n) {
 					possibleConstructorDecls = append(possibleConstructorDecls, n)
 
 					return
@@ -78,12 +83,13 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 					doc = n.Doc
 				}
 
-				checker, ok := valueobject.NewDefinition(typeSpec, doc)
-				if !ok {
-					continue
+				if voDefinition, okVo := valueobject.NewDefinition(typeSpec, doc); okVo {
+					valueObjectDefinitions[typeSpec.Name.Name] = voDefinition
 				}
 
-				valueObjectDefinitions[typeSpec.Name.Name] = checker
+				if eDefinition, okE := entity.NewDefinition(typeSpec, doc); okE {
+					entitiesDefinitions[typeSpec.Name.Name] = eDefinition
+				}
 			}
 		}
 	})
@@ -94,30 +100,43 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 			continue
 		}
 
-		definition, ok := valueObjectDefinitions[structIdent.Name]
-		if !ok {
-			continue
+		if definition, ok := valueObjectDefinitions[structIdent.Name]; ok {
+			definition.AddConstructor(possibleConstructor)
 		}
 
-		definition.AddConstructor(possibleConstructor)
+		if definition, ok := entitiesDefinitions[structIdent.Name]; ok {
+			definition.AddConstructor(possibleConstructor)
+		}
 	}
 
 	for _, methodDecl := range methodsDecls {
-		rcvName, hasRcvName := getRcvName(methodDecl.Recv.List[0].Type)
+		rcvName, hasRcvName := astutils.GetRcvName(methodDecl.Recv.List[0].Type)
 		if !hasRcvName {
 			continue
 		}
 
-		definition, ok := valueObjectDefinitions[rcvName]
-		if !ok {
+		if definition, ok := valueObjectDefinitions[rcvName]; ok {
+			definition.AddMethod(methodDecl)
+
 			continue
 		}
 
-		definition.AddMethod(methodDecl)
+		if definition, ok := entitiesDefinitions[rcvName]; ok {
+			definition.AddMethod(methodDecl)
+
+			continue
+		}
 	}
 
 	for _, voDefinition := range valueObjectDefinitions {
-		diags := valueObjectChecker.Check(*voDefinition)
+		diags := valueObjectChecker.Check(voDefinition)
+		for _, diag := range diags {
+			pass.Report(diag)
+		}
+	}
+
+	for _, eDefinition := range entitiesDefinitions {
+		diags := entitiesChecker.Check(eDefinition)
 		for _, diag := range diags {
 			pass.Report(diag)
 		}
