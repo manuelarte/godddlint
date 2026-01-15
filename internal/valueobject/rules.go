@@ -6,6 +6,7 @@ import (
 
 	"golang.org/x/tools/go/analysis"
 
+	"github.com/manuelarte/godddlint/internal/astutils"
 	"github.com/manuelarte/godddlint/internal/model"
 )
 
@@ -19,6 +20,8 @@ type (
 	nonPointerReceivers struct{}
 	// Rule that checks that value objects have constructor(s) and unexported fields.
 	immutable struct{}
+	// Rule that checks that map/slices are defensively copied.
+	defensiveCopy struct{}
 )
 
 func (r nonPointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
@@ -88,4 +91,127 @@ func (r immutable) Metadata() model.RuleMetadata {
 		Code: "VOX001",
 		Name: "Immutable",
 	}
+}
+
+//nolint:gocognit,nestif // Refactor later
+func (r defensiveCopy) Apply(d *model.Definition) []analysis.Diagnostic {
+	allDiag := make([]analysis.Diagnostic, 0)
+
+	for _, constructor := range d.Constructors {
+		ast.Inspect(constructor.Body, func(n ast.Node) bool {
+			// Check for direct assignment: v.Field = param
+			if assignStmt, ok := n.(*ast.AssignStmt); ok {
+				for i, lhs := range assignStmt.Lhs {
+					selectorExpr, isSelector := lhs.(*ast.SelectorExpr)
+					if !isSelector {
+						continue
+					}
+
+					rhs := assignStmt.Rhs[i]
+
+					rhsIdent, isIdent := rhs.(*ast.Ident)
+					if !isIdent {
+						continue
+					}
+
+					if r.isMapOrSliceField(selectorExpr, d) && r.isConstructorParam(rhsIdent, constructor) {
+						metadata := r.Metadata()
+						diag := analysis.Diagnostic{
+							Pos:      assignStmt.Pos(),
+							End:      assignStmt.End(),
+							Category: metadata.Name,
+							Message:  fmt.Sprintf("%s: Maps/Slices Not Defensive Copied", metadata.Code),
+							URL:      metadata.URL,
+						}
+						allDiag = append(allDiag, diag)
+					}
+				}
+			}
+
+			// Check for struct initialization: MyStruct{Field: param}
+			if compLit, isCompLit := n.(*ast.CompositeLit); isCompLit {
+				if !r.isTargetStruct(compLit, d) {
+					return true
+				}
+
+				for _, elt := range compLit.Elts {
+					kv, ok := elt.(*ast.KeyValueExpr)
+					if !ok {
+						continue
+					}
+
+					keyIdent, ok := kv.Key.(*ast.Ident)
+					if !ok {
+						continue
+					}
+
+					valueIdent, ok := kv.Value.(*ast.Ident)
+					if !ok {
+						continue
+					}
+
+					if r.isMapOrSliceFieldByName(keyIdent.Name, d) && r.isConstructorParam(valueIdent, constructor) {
+						metadata := r.Metadata()
+						diag := analysis.Diagnostic{
+							Pos:      kv.Pos(),
+							End:      kv.End(),
+							Category: metadata.Name,
+							Message:  fmt.Sprintf("%s: Maps/Slices Not Defensive Copied", metadata.Code),
+							URL:      metadata.URL,
+						}
+						allDiag = append(allDiag, diag)
+					}
+				}
+			}
+
+			return true
+		})
+	}
+
+	return allDiag
+}
+
+func (r defensiveCopy) Metadata() model.RuleMetadata {
+	return model.RuleMetadata{
+		Code: "VOX002",
+		Name: "Maps/Slices Not Defensive Copied",
+	}
+}
+
+func (r defensiveCopy) isTargetStruct(compLit *ast.CompositeLit, d *model.Definition) bool {
+	if compLit.Type == nil {
+		return false
+	}
+
+	ident, ok := compLit.Type.(*ast.Ident)
+	if !ok {
+		return false
+	}
+
+	return ident.Name == d.TypeSpec.Name.Name
+}
+
+func (r defensiveCopy) isMapOrSliceFieldByName(fieldName string, d *model.Definition) bool {
+	structType, ok := d.TypeSpec.Type.(*ast.StructType)
+	if !ok {
+		return false
+	}
+
+	return astutils.IsMapOrSliceField(fieldName, structType)
+}
+
+func (r defensiveCopy) isMapOrSliceField(selector *ast.SelectorExpr, d *model.Definition) bool {
+	return r.isMapOrSliceFieldByName(selector.Sel.Name, d)
+}
+
+func (r defensiveCopy) isConstructorParam(ident *ast.Ident, constructor *ast.FuncDecl) bool {
+	for _, param := range constructor.Type.Params.List {
+		for _, name := range param.Names {
+			if name.Name == ident.Name {
+				return true
+			}
+		}
+	}
+
+	return false
 }

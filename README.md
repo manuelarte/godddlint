@@ -90,6 +90,7 @@ type User struct {
 
 ##### E004: Meaningful Errors
 
+TODO
 Business processes that can return an error need to return a meaningful error, not a generic one.
 
 <table>
@@ -206,7 +207,6 @@ func New(x, y int) Point {
 
 #### VOX002: Maps/Slices Not Defensive Copied
 
-TODO
 When using a `map` or a `slice` inside a value object, we should prevent that it gets mutated.
 To avoid that, you can use *Defensive Copy*.
 

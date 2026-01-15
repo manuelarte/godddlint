@@ -11,6 +11,7 @@ func NewChecker() model.Checker {
 	return model.NewChecker([]model.Rule{
 		nonPointerReceivers{},
 		immutable{},
+		defensiveCopy{},
 	})
 }
 
