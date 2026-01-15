@@ -88,7 +88,7 @@ type User struct {
 </tbody>
 </table>
 
-##### E004: Meaningful Errors
+##### E004: Use Custom Domain Errors
 
 TODO
 Business processes that can return an error need to return a meaningful error, not a generic one.
