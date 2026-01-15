@@ -128,7 +128,7 @@ linters:
         - os.OpenFile
         - os.WriteFile
       ignored-numbers:
-        - 2
+        - "2"
     nolintlint:
       require-explanation: true
       require-specific: true
