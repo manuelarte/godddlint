@@ -91,6 +91,10 @@ func IsPotentialConstructor(f *ast.FuncDecl) bool {
 		return false
 	}
 
+	if f.Type.Results == nil {
+		return false
+	}
+
 	results := f.Type.Results.List
 	if len(results) == 1 {
 		return true
