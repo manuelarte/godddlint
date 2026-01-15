@@ -8,6 +8,7 @@ import (
 
 	"github.com/manuelarte/godddlint/internal/astutils"
 	"github.com/manuelarte/godddlint/internal/model"
+	"github.com/manuelarte/godddlint/rules"
 )
 
 var (
@@ -44,11 +45,8 @@ func (r nonPointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
 	return allDiag
 }
 
-func (r nonPointerReceivers) Metadata() model.RuleMetadata {
-	return model.RuleMetadata{
-		Code: "VO001",
-		Name: "Non Pointer Receivers",
-	}
+func (r nonPointerReceivers) Metadata() rules.RuleMetadata {
+	return rules.NonPointerReceivers
 }
 
 func (r immutable) Apply(d *model.Definition) []analysis.Diagnostic {
@@ -72,10 +70,11 @@ func (r immutable) Apply(d *model.Definition) []analysis.Diagnostic {
 			for _, n := range f.Names {
 				if n.IsExported() {
 					diag := analysis.Diagnostic{
-						Pos:     n.Pos(),
-						End:     n.End(),
-						Message: fmt.Sprintf("%s: Value Object's field is exported", metadata.Code),
-						URL:     metadata.URL,
+						Pos:      n.Pos(),
+						End:      n.End(),
+						Category: metadata.Name,
+						Message:  fmt.Sprintf("%s: Value Object's field is exported", metadata.Code),
+						URL:      metadata.URL,
 					}
 					allDiag = append(allDiag, diag)
 				}
@@ -86,11 +85,8 @@ func (r immutable) Apply(d *model.Definition) []analysis.Diagnostic {
 	return allDiag
 }
 
-func (r immutable) Metadata() model.RuleMetadata {
-	return model.RuleMetadata{
-		Code: "VOX001",
-		Name: "Immutable",
-	}
+func (r immutable) Metadata() rules.RuleMetadata {
+	return rules.Immutable
 }
 
 //nolint:gocognit,nestif // Refactor later
@@ -155,11 +151,8 @@ func (r defensiveCopy) Apply(d *model.Definition) []analysis.Diagnostic {
 	return allDiag
 }
 
-func (r defensiveCopy) Metadata() model.RuleMetadata {
-	return model.RuleMetadata{
-		Code: "VOX002",
-		Name: "Maps/Slices Not Defensive Copied",
-	}
+func (r defensiveCopy) Metadata() rules.RuleMetadata {
+	return rules.DefensiveCopy
 }
 
 func (r defensiveCopy) isTargetStruct(compLit *ast.CompositeLit, d *model.Definition) bool {

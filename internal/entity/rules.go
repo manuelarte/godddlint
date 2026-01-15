@@ -8,6 +8,7 @@ import (
 
 	"github.com/manuelarte/godddlint/internal/astutils"
 	"github.com/manuelarte/godddlint/internal/model"
+	"github.com/manuelarte/godddlint/rules"
 )
 
 var _ model.Rule = new(pointerReceivers)
@@ -17,6 +18,7 @@ type (
 	pointerReceivers          struct{}
 	customTypesOverPrimitives struct{}
 	customDomainErrors        struct{}
+	unexportedFields          struct{}
 )
 
 func (r pointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
@@ -40,11 +42,8 @@ func (r pointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
 	return allDiag
 }
 
-func (r pointerReceivers) Metadata() model.RuleMetadata {
-	return model.RuleMetadata{
-		Code: "E001",
-		Name: "Pointer Receivers",
-	}
+func (r pointerReceivers) Metadata() rules.RuleMetadata {
+	return rules.PointerReceivers
 }
 
 func (r customTypesOverPrimitives) Apply(d *model.Definition) []analysis.Diagnostic {
@@ -70,11 +69,8 @@ func (r customTypesOverPrimitives) Apply(d *model.Definition) []analysis.Diagnos
 	return allDiag
 }
 
-func (r customTypesOverPrimitives) Metadata() model.RuleMetadata {
-	return model.RuleMetadata{
-		Code: "E003",
-		Name: "Custom Types Over Primitives",
-	}
+func (r customTypesOverPrimitives) Metadata() rules.RuleMetadata {
+	return rules.CustomTypesOverPrimitives
 }
 
 func (r customDomainErrors) Apply(d *model.Definition) []analysis.Diagnostic {
@@ -114,9 +110,35 @@ func (r customDomainErrors) Apply(d *model.Definition) []analysis.Diagnostic {
 	return allDiag
 }
 
-func (r customDomainErrors) Metadata() model.RuleMetadata {
-	return model.RuleMetadata{
-		Code: "E004",
-		Name: "Custom Domain Errors",
+func (r customDomainErrors) Metadata() rules.RuleMetadata {
+	return rules.CustomDomainErrors
+}
+
+func (r unexportedFields) Apply(d *model.Definition) []analysis.Diagnostic {
+	allDiag := make([]analysis.Diagnostic, 0)
+
+	if st, ok := d.TypeSpec.Type.(*ast.StructType); ok {
+		metadata := r.Metadata()
+
+		for _, f := range st.Fields.List {
+			for _, n := range f.Names {
+				if n.IsExported() {
+					diag := analysis.Diagnostic{
+						Pos:      n.Pos(),
+						End:      n.End(),
+						Category: metadata.Name,
+						Message:  fmt.Sprintf("%s: Entity's field is exported", metadata.Code),
+						URL:      metadata.URL,
+					}
+					allDiag = append(allDiag, diag)
+				}
+			}
+		}
 	}
+
+	return allDiag
+}
+
+func (r unexportedFields) Metadata() rules.RuleMetadata {
+	return rules.UnexportedFields
 }

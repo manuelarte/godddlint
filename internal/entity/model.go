@@ -12,6 +12,7 @@ func NewChecker() model.Checker {
 		pointerReceivers{},
 		customTypesOverPrimitives{},
 		customDomainErrors{},
+		unexportedFields{},
 	})
 }
 

@@ -9,11 +9,11 @@ type (
 
 //godddlint:entity
 type User struct {
-	Id      int // want `E003: Prefer custom domain types to primitives`
-	Name    Name
-	Surname Surname
+	id      int // want `E003: Prefer custom domain types to primitives`
+	name    Name
+	surname Surname
 }
 
 func (u User) FullName() string { // want `E001: Entity's method not using pointer receiver`
-	return fmt.Sprintf("%s %s", u.Name, u.Surname)
+	return fmt.Sprintf("%s %s", u.name, u.surname)
 }

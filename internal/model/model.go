@@ -4,6 +4,8 @@ import (
 	"go/ast"
 
 	"golang.org/x/tools/go/analysis"
+
+	"github.com/manuelarte/godddlint/rules"
 )
 
 type (
@@ -20,13 +22,9 @@ type (
 		rules []Rule
 	}
 
-	RuleMetadata struct {
-		Code, Name, URL string
-	}
-
 	Rule interface {
 		Apply(definition *Definition) []analysis.Diagnostic
-		Metadata() RuleMetadata
+		Metadata() rules.RuleMetadata
 	}
 )
 
