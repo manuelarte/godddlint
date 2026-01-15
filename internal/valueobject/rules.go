@@ -95,39 +95,22 @@ func (r immutable) Metadata() model.RuleMetadata {
 
 //nolint:gocognit,nestif // Refactor later
 func (r defensiveCopy) Apply(d *model.Definition) []analysis.Diagnostic {
+	structType, isStructType := d.TypeSpec.Type.(*ast.StructType)
+	if !isStructType {
+		return nil
+	}
+
 	allDiag := make([]analysis.Diagnostic, 0)
-
 	for _, constructor := range d.Constructors {
-		ast.Inspect(constructor.Body, func(n ast.Node) bool {
-			// Check for direct assignment: v.Field = param
-			if assignStmt, ok := n.(*ast.AssignStmt); ok {
-				for i, lhs := range assignStmt.Lhs {
-					selectorExpr, isSelector := lhs.(*ast.SelectorExpr)
-					if !isSelector {
-						continue
-					}
+		mapOrSliceFieldNames := make(map[string]struct{})
 
-					rhs := assignStmt.Rhs[i]
-
-					rhsIdent, isIdent := rhs.(*ast.Ident)
-					if !isIdent {
-						continue
-					}
-
-					if r.isMapOrSliceField(selectorExpr, d) && r.isConstructorParam(rhsIdent, constructor) {
-						metadata := r.Metadata()
-						diag := analysis.Diagnostic{
-							Pos:      assignStmt.Pos(),
-							End:      assignStmt.End(),
-							Category: metadata.Name,
-							Message:  fmt.Sprintf("%s: Maps/Slices Not Defensive Copied", metadata.Code),
-							URL:      metadata.URL,
-						}
-						allDiag = append(allDiag, diag)
-					}
-				}
+		for _, f := range astutils.GetFieldsThatMustDefensiveCopy(structType) {
+			for _, name := range f.Names {
+				mapOrSliceFieldNames[name.Name] = struct{}{}
 			}
+		}
 
+		ast.Inspect(constructor.Body, func(n ast.Node) bool {
 			// Check for struct initialization: MyStruct{Field: param}
 			if compLit, isCompLit := n.(*ast.CompositeLit); isCompLit {
 				if !r.isTargetStruct(compLit, d) {
@@ -150,7 +133,8 @@ func (r defensiveCopy) Apply(d *model.Definition) []analysis.Diagnostic {
 						continue
 					}
 
-					if r.isMapOrSliceFieldByName(keyIdent.Name, d) && r.isConstructorParam(valueIdent, constructor) {
+					if _, containsKey := mapOrSliceFieldNames[keyIdent.Name]; containsKey &&
+						r.isConstructorParam(valueIdent, constructor) {
 						metadata := r.Metadata()
 						diag := analysis.Diagnostic{
 							Pos:      kv.Pos(),
@@ -189,19 +173,6 @@ func (r defensiveCopy) isTargetStruct(compLit *ast.CompositeLit, d *model.Defini
 	}
 
 	return ident.Name == d.TypeSpec.Name.Name
-}
-
-func (r defensiveCopy) isMapOrSliceFieldByName(fieldName string, d *model.Definition) bool {
-	structType, ok := d.TypeSpec.Type.(*ast.StructType)
-	if !ok {
-		return false
-	}
-
-	return astutils.IsMapOrSliceField(fieldName, structType)
-}
-
-func (r defensiveCopy) isMapOrSliceField(selector *ast.SelectorExpr, d *model.Definition) bool {
-	return r.isMapOrSliceFieldByName(selector.Sel.Name, d)
 }
 
 func (r defensiveCopy) isConstructorParam(ident *ast.Ident, constructor *ast.FuncDecl) bool {

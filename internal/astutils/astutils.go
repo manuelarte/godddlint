@@ -17,20 +17,19 @@ func GetRcvName(expr ast.Expr) (string, bool) {
 	}
 }
 
-// IsMapOrSliceField checks whether a field by name is a map or a slice.
-func IsMapOrSliceField(fieldName string, structType *ast.StructType) bool {
-	for _, field := range structType.Fields.List {
-		for _, name := range field.Names {
-			if name.Name == fieldName {
-				_, isMap := field.Type.(*ast.MapType)
-				_, isSlice := field.Type.(*ast.ArrayType)
+func GetFieldsThatMustDefensiveCopy(st *ast.StructType) []*ast.Field {
+	fields := make([]*ast.Field, 0)
 
-				return isMap || isSlice
-			}
+	for _, field := range st.Fields.List {
+		_, isMap := field.Type.(*ast.MapType)
+
+		_, isSlice := field.Type.(*ast.ArrayType)
+		if isMap || isSlice {
+			fields = append(fields, field)
 		}
 	}
 
-	return false
+	return fields
 }
 
 func IsPotentialConstructor(f *ast.FuncDecl) bool {
