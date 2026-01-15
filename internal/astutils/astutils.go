@@ -66,3 +66,37 @@ func IsPrimitiveType(f *ast.Field) bool {
 
 	return slices.Contains(primitiveTypes, ident.Name)
 }
+
+func IsErrorsNewFun(callExpr *ast.CallExpr) bool {
+	if se, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+		ident, isIdent := se.X.(*ast.Ident)
+		if !isIdent {
+			return false
+		}
+
+		return ident.Name == "errors" && se.Sel.Name == "New"
+	}
+
+	return false
+}
+
+// FuncResultError returns the position in the function results where the error is.
+// e.g. func myFunction() (int, error), would return (1, true).
+func FuncResultError(f *ast.FuncDecl) (int, bool) {
+	if f.Type.Results == nil {
+		return -1, false
+	}
+
+	for i, result := range f.Type.Results.List {
+		ident, ok := result.Type.(*ast.Ident)
+		if !ok {
+			continue
+		}
+
+		if ident.Name == "error" {
+			return i, true
+		}
+	}
+
+	return -1, false
+}

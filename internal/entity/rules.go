@@ -56,10 +56,11 @@ func (r customTypesOverPrimitives) Apply(d *model.Definition) []analysis.Diagnos
 		for _, f := range st.Fields.List {
 			if astutils.IsPrimitiveType(f) {
 				diag := analysis.Diagnostic{
-					Pos:     f.Pos(),
-					End:     f.End(),
-					Message: fmt.Sprintf("%s: Prefer custom domain types to primitives", metadata.Code),
-					URL:     metadata.URL,
+					Pos:      f.Pos(),
+					End:      f.End(),
+					Category: metadata.Name,
+					Message:  fmt.Sprintf("%s: Prefer custom domain types to primitives", metadata.Code),
+					URL:      metadata.URL,
 				}
 				allDiag = append(allDiag, diag)
 			}
@@ -77,8 +78,40 @@ func (r customTypesOverPrimitives) Metadata() model.RuleMetadata {
 }
 
 func (r customDomainErrors) Apply(d *model.Definition) []analysis.Diagnostic {
-	// TODO:
-	return nil
+	allDiag := make([]analysis.Diagnostic, 0)
+	metadata := r.Metadata()
+
+	for _, m := range d.Methods {
+		errorPos, hasError := astutils.FuncResultError(m)
+		if !hasError {
+			continue
+		}
+
+		ast.Inspect(m.Body, func(n ast.Node) bool {
+			//nolint:gocritic // will cover more cases
+			switch n := n.(type) {
+			//nolint:gocritic // will cover more cases
+			case *ast.ReturnStmt:
+				errorReturn := n.Results[errorPos]
+				switch rt := errorReturn.(type) {
+				case *ast.CallExpr:
+					if astutils.IsErrorsNewFun(rt) {
+						diag := analysis.Diagnostic{
+							Pos:      rt.Pos(),
+							End:      rt.End(),
+							Category: metadata.Name,
+							Message:  fmt.Sprintf("%s: Returning errors.New instead of a domain error", metadata.Code),
+						}
+						allDiag = append(allDiag, diag)
+					}
+				}
+			}
+
+			return true
+		})
+	}
+
+	return allDiag
 }
 
 func (r customDomainErrors) Metadata() model.RuleMetadata {

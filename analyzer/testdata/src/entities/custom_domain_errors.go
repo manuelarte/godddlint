@@ -17,7 +17,7 @@ type UserDomainError struct {
 
 func (u *UserDomainError) AddAddress(na Address) error {
 	if len(u.addresses) >= 2 {
-		return errors.New("maximum number of addresses reached") // want `E004: Use Custom Domain Errors`
+		return errors.New("maximum number of addresses reached") // want `E004: Returning errors.New instead of a domain error`
 	}
 	u.addresses = append(u.addresses, na)
 
@@ -25,5 +25,5 @@ func (u *UserDomainError) AddAddress(na Address) error {
 }
 
 func (u *UserDomainError) SaveUser(repo Repository) error {
-	return repo.SaveUser(u) // want `E004: Use Custom Domain Errors`
+	return repo.SaveUser(u)
 }
