@@ -28,6 +28,13 @@ func New() *analysis.Analyzer {
 
 type godddlint struct{}
 
+// run The run function analyze the files per package and will keep track of the
+// functions that can be a constructor, the methods and all the structs that
+// are annotated with valueObject or entity directives.
+// Then it will link the constructor and methods found to the ddd structs.
+// Once we have all the constructor and methods for a particular struct,
+// we will apply the opinionated rules to them.
+//
 //nolint:gocognit // Refactor later
 func (g godddlint) run(pass *analysis.Pass) (any, error) {
 	insp, found := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)

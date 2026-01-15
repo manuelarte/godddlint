@@ -1,4 +1,4 @@
-# Go DDD Lint
+# 🧐 Go DDD Lint
 
 [![CI](https://github.com/manuelarte/godddlint/actions/workflows/ci.yml/badge.svg)](https://github.com/manuelarte/godddlint/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/manuelarte/godddlint)](https://goreportcard.com/report/github.com/manuelarte/godddlint)
@@ -90,7 +90,6 @@ type User struct {
 
 ##### E004: Use Custom Domain Errors
 
-TODO
 Business processes that can return an error need to return a meaningful error, not a generic one.
 
 <table>
@@ -209,6 +208,23 @@ func New(x, y int) Point {
 
 When using a `map` or a `slice` inside a value object, we should prevent that it gets mutated.
 To avoid that, you can use *Defensive Copy*.
+
+## 📚 Glossary
+
+* Constructor
+
+In Go there is no concept of a constructor, but normally a constructor is considered a function that returns
+a struct, or a struct and an error, and starts with `New` or `Must`, e.g. `func NewMyStruct(...) MyStruct`.
+
+* Domain Error
+
+It is a Go error struct (struct that implements `Error() string`) but that gives a domain meaning to
+the error.
+
+* Domain Struct
+
+A domain struct is a Go struct that represents a domain object.
+It can be an Aggregate, Entity or a Value Object.
 
 [entity]: https://en.wikipedia.org/wiki/Entity#In_computer_science
 [value-object]: https://en.wikipedia.org/wiki/Value_object
