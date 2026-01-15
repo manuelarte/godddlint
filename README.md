@@ -4,6 +4,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/manuelarte/godddlint)](https://goreportcard.com/report/github.com/manuelarte/godddlint)
 ![version](https://img.shields.io/github/v/release/manuelarte/godddlint)
 
+Go DDD Lint is an opinionated linter that checks for some of the properties a DDD model should achieve.
+
 ## ⬇️  Getting Started
 
 To install it, run:
@@ -12,7 +14,8 @@ To install it, run:
 go install github.com/manuelarte/godddlint@latest
 ```
 
-To run it in your project:
+Mark your [value object][value-object] structs with `//godddlint:valueObject` and your entities with `//godddlint:entity`
+and then run this linter in your project with:
 
 ```bash
 godddlint ./...
@@ -28,9 +31,11 @@ An [entity][entity] is an object defined not by its attributes, but its identity
 
 ##### E001: ID is the first embedded field
 
+TODO
+
 ##### E002: Pointer Receivers
 
-An Entity can mutate, so then an internal mutation is allowed.
+An `Entity` can mutate, so then an internal mutation is allowed.
 
 ```go
 //godddlint:entity
@@ -46,7 +51,23 @@ func (c *User) ...
 
 ##### E003: Custom Types Over Primitives
 
-An Entity field needs to have more meaning than just a primitive value.
+An `Entity` field needs to have more meaning than just a primitive value.
+
+<table>
+<thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+type User struct {
+  id      string
+  name    string
+  address string
+}
+...
+```
+
+</td><td>
 
 ```go
 type UserID int
@@ -55,49 +76,95 @@ type Address string
 
 //godddlint:entity
 type User struct {
-    id      UserID
-    name    Name
-    address Address
+  id      UserID
+  name    Name
+  address Address
 }
+...
 ```
 
-##### E004: Using Custom Errors
+</td></tr>
 
-Business processes that can return an error needs to return a meaningful error, not a generic one.
+</tbody>
+</table>
+
+##### E004: Meaningful Errors
+
+Business processes that can return an error need to return a meaningful error, not a generic one.
+
+<table>
+<thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
+<tbody>
+<tr><td>
 
 ```go
-//godddlint:entity
-type User struct {
-    id                  UserID
-    name                Name
-    address             []Address
+func (c *User) AddAddress(na Address) error {
+  if len(c.addresses) >= 2 {
+    return errors.New("max number of moves reached")
+  }
+  c.addresses = append(c.addresses, na)
+  return nil
 }
-
-func (c *User) UserMoved(na Address) error {
-    if len(c.address) >= 2 {
-        return UserNotAllowedToMoveError{}
-    }
-     c.address = append(c.address, na)
-     return nil
-}
+...
 ```
+
+</td><td>
+
+```go
+func (c *User) AddAddress(na Address) error {
+  if len(c.addresses) >= 2 {
+    return UserNotAllowedToMoveError{}
+  }
+  c.addresses = append(c.addresses, na)
+  return nil
+}
+...
+```
+
+</td></tr>
+
+</tbody>
+</table>
 
 ##### E005: Unexported Fields
 
 Entity fields need to be mutated by a method that indicates a business process. Not by just changing the field.
 
+<table>
+<thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
+<tbody>
+<tr><td>
+
+```go
+type User struct {
+  ID      UserID
+  Name    Name
+  Address Address
+}
+...
+u.Address = na
+```
+
+</td><td>
+
 ```go
 //godddlint:entity
 type User struct {
-    id      UserID
-    name    Name
-    address Address
+  id      UserID
+  name    Name
+  address Address
 }
 
 func (c *User) UserMoved(na Address) {
-    c.address = na
+  c.address = na
 }
+...
 ```
+
+</td></tr>
+
+</tbody>
+</table>
 
 ### Value Objects
 
@@ -139,6 +206,7 @@ func New(x, y int) Point {
 
 #### VOX002: Maps/Slices Not Defensive Copied
 
+TODO
 When using a `map` or a `slice` inside a value object, we should prevent that it gets mutated.
 To avoid that, you can use *Defensive Copy*.
 
