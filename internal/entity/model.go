@@ -11,6 +11,7 @@ func NewChecker() model.Checker {
 	return model.NewChecker([]model.Rule{
 		pointerReceivers{},
 		customTypesOverPrimitives{},
+		customDomainErrors{},
 	})
 }
 

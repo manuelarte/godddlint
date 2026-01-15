@@ -16,6 +16,7 @@ type (
 	// Rule that checks that Entities use pointer receivers.
 	pointerReceivers          struct{}
 	customTypesOverPrimitives struct{}
+	customDomainErrors        struct{}
 )
 
 func (r pointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
@@ -72,5 +73,17 @@ func (r customTypesOverPrimitives) Metadata() model.RuleMetadata {
 	return model.RuleMetadata{
 		Code: "E003",
 		Name: "Custom Types Over Primitives",
+	}
+}
+
+func (r customDomainErrors) Apply(d *model.Definition) []analysis.Diagnostic {
+	// TODO:
+	return nil
+}
+
+func (r customDomainErrors) Metadata() model.RuleMetadata {
+	return model.RuleMetadata{
+		Code: "E004",
+		Name: "Custom Domain Errors",
 	}
 }
