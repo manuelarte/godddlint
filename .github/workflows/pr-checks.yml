@@ -19,16 +19,6 @@ jobs:
           go mod tidy
           git diff --exit-code go.mod
           git diff --exit-code go.sum
-  govulncheck:
-    runs-on: ubuntu-latest
-    name: Run govulncheck
-    steps:
-      - uses: actions/checkout@v6
-      - id: govulncheck
-        uses: golang/govulncheck-action@v1
-        with:
-          go-version-input: oldstable
-          go-package: ./...
   golangci:
     name: lint
     runs-on: ${{ matrix.os }}

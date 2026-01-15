@@ -18,6 +18,7 @@ test: ## Run unit tests, alias: t
 	go test --cover -timeout=300s -parallel=16 ./...
 .PHONY: t test
 
+fmt: format-code
 format-code: tidy ## Format go code and run the fixer
 	golangci-lint fmt
 .PHONY: format-code
