@@ -57,7 +57,7 @@ func (r customTypesOverPrimitives) Apply(d *model.Definition) []analysis.Diagnos
 				diag := analysis.Diagnostic{
 					Pos:     f.Pos(),
 					End:     f.End(),
-					Message: fmt.Sprintf("%s: Prefer custom types to primitives", metadata.Code),
+					Message: fmt.Sprintf("%s: Prefer custom domain types to primitives", metadata.Code),
 					URL:     metadata.URL,
 				}
 				allDiag = append(allDiag, diag)

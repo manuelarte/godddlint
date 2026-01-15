@@ -9,7 +9,7 @@ type (
 
 //godddlint:entity
 type User struct {
-	Id      int // want `E003: Prefer custom types to primitives`
+	Id      int // want `E003: Prefer custom domain types to primitives`
 	Name    Name
 	Surname Surname
 }

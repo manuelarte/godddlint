@@ -49,7 +49,7 @@ type User struct {
 func (c *User) ...
 ```
 
-##### E003: Custom Types Over Primitives
+##### E003: Custom Domain Types Over Primitives
 
 An `Entity` field needs to have more meaning than just a primitive value.
 
