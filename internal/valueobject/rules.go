@@ -15,7 +15,7 @@ var (
 )
 
 type (
-	// Rule that checks that value objects use non pointer receivers.
+	// Rule that checks that value objects use non-pointer receivers.
 	nonPointerReceivers struct{}
 	// Rule that checks that value objects have constructor(s) and unexported fields.
 	immutable struct{}
