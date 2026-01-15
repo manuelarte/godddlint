@@ -128,6 +128,7 @@ func (c *User) AddAddress(na Address) error {
 
 ##### E005: Unexported Fields
 
+TODO
 Entity fields need to be mutated by a method that indicates a business process. Not by just changing the field.
 
 <table>
