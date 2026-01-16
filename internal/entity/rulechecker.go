@@ -2,13 +2,13 @@ package entity
 
 import (
 	"go/ast"
-	"slices"
 
+	"github.com/manuelarte/godddlint/internal/astutils"
 	"github.com/manuelarte/godddlint/internal/model"
 )
 
-func NewChecker() model.Checker {
-	return model.NewChecker([]model.Rule{
+func NewRuleChecker() model.RuleChecker {
+	return model.NewRuleChecker([]model.Rule{
 		pointerReceivers{},
 		customTypesOverPrimitives{},
 		customDomainErrors{},
@@ -21,11 +21,5 @@ func NewDefinition(spec *ast.TypeSpec, doc *ast.CommentGroup) (*model.Definition
 	return &model.Definition{
 		TypeSpec: spec,
 		Doc:      doc,
-	}, commentContainsValueObject(doc)
-}
-
-func commentContainsValueObject(doc *ast.CommentGroup) bool {
-	return doc != nil && slices.ContainsFunc(doc.List, func(c *ast.Comment) bool {
-		return c.Text == "//godddlint:entity"
-	})
+	}, astutils.CommentHasPrefix(doc, "//godddlint:entity")
 }

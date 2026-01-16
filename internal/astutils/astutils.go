@@ -3,7 +3,15 @@ package astutils
 import (
 	"go/ast"
 	"slices"
+	"strings"
 )
+
+// CommentHasPrefix check if a comment group contains the following text.
+func CommentHasPrefix(doc *ast.CommentGroup, text string) bool {
+	return doc != nil && slices.ContainsFunc(doc.List, func(c *ast.Comment) bool {
+		return strings.HasPrefix(c.Text, text)
+	})
+}
 
 // FuncResultError returns the position in the function results where the error is.
 // e.g. func myFunction() (int, error), would return (1, true).

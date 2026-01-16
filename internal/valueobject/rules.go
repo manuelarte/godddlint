@@ -18,7 +18,9 @@ var (
 
 type (
 	// Rule that checks that value objects use non-pointer receivers.
-	nonPointerReceivers struct{}
+	nonPointerReceivers struct {
+		ruleEnableChecker model.RuleEnablerChecker
+	}
 	// Rule that checks that value objects have constructor(s) and unexported fields.
 	immutable struct{}
 	// Rule that checks that map/slices are defensively copied.
@@ -26,9 +28,17 @@ type (
 )
 
 func (r nonPointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
+	if !r.ruleEnableChecker.IsEnabled(d.Doc) {
+		return nil
+	}
+
 	allDiag := make([]analysis.Diagnostic, 0)
 
 	for _, m := range d.Methods {
+		if astutils.CommentHasPrefix(m.Doc, "//goddlint:disable:VO001") {
+			continue
+		}
+
 		if se, ok := m.Recv.List[0].Type.(*ast.StarExpr); ok {
 			metadata := r.Metadata()
 			diag := analysis.Diagnostic{
@@ -43,6 +53,10 @@ func (r nonPointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
 	}
 
 	return allDiag
+}
+
+func (r nonPointerReceivers) IsEnabled(doc *ast.CommentGroup) bool {
+	return r.ruleEnableChecker.IsEnabled(doc)
 }
 
 func (r nonPointerReceivers) Metadata() rules.RuleMetadata {

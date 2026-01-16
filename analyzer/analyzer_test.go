@@ -19,6 +19,10 @@ func TestAnalyzer(t *testing.T) {
 			patterns: "valueObjects",
 		},
 		{
+			desc:     "valueObjects disable rules",
+			patterns: "valueObjects-disable-rules",
+		},
+		{
 			desc:     "entities",
 			patterns: "entities",
 		},

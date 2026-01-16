@@ -2,14 +2,17 @@ package valueobject
 
 import (
 	"go/ast"
-	"slices"
 
+	"github.com/manuelarte/godddlint/internal/astutils"
 	"github.com/manuelarte/godddlint/internal/model"
+	"github.com/manuelarte/godddlint/rules"
 )
 
-func NewChecker() model.Checker {
-	return model.NewChecker([]model.Rule{
-		nonPointerReceivers{},
+func NewRuleChecker() model.RuleChecker {
+	return model.NewRuleChecker([]model.Rule{
+		nonPointerReceivers{
+			model.CommentRuleEnabler{RuleCode: rules.NonPointerReceivers.Code},
+		},
 		immutable{},
 		defensiveCopy{},
 	})
@@ -20,11 +23,5 @@ func NewDefinition(spec *ast.TypeSpec, doc *ast.CommentGroup) (*model.Definition
 	return &model.Definition{
 		TypeSpec: spec,
 		Doc:      doc,
-	}, commentContainsValueObject(doc)
-}
-
-func commentContainsValueObject(doc *ast.CommentGroup) bool {
-	return doc != nil && slices.ContainsFunc(doc.List, func(c *ast.Comment) bool {
-		return c.Text == "//godddlint:valueObject"
-	})
+	}, astutils.CommentHasPrefix(doc, "//godddlint:valueObject")
 }

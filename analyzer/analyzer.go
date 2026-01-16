@@ -48,10 +48,10 @@ func (g godddlint) run(pass *analysis.Pass) (any, error) {
 		(*ast.GenDecl)(nil),
 	}
 
-	valueObjectChecker := valueobject.NewChecker()
+	valueObjectChecker := valueobject.NewRuleChecker()
 	valueObjectDefinitions := make(map[string]*model.Definition)
 
-	entitiesChecker := entity.NewChecker()
+	entitiesChecker := entity.NewRuleChecker()
 	entitiesDefinitions := make(map[string]*model.Definition)
 
 	possibleConstructorDecls := make([]*ast.FuncDecl, 0)
