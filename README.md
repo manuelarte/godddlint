@@ -187,6 +187,8 @@ type Point struct {
 func (c *Point) ...
 ```
 
+You can disable this rule at struct level, but also at method level by adding `//goddlint:disable:VO001`.
+
 ##### VOX001: Immutable
 
 A value object makes sense when the properties are immutable.
