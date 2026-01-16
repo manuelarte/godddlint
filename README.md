@@ -187,7 +187,17 @@ type Point struct {
 func (c *Point) ...
 ```
 
-You can disable this rule at struct level, but also at method level by adding `//goddlint:disable:VO001`.
+You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:VO001`:
+
+```go
+//godddlint:valueObject
+type Point struct {
+    x, y int
+}
+
+//goddlint:disable:VO001
+func (c *Point) ...
+```
 
 ##### VOX001: Immutable
 
@@ -204,6 +214,20 @@ type Point struct {
 
 func New(x, y int) Point {
     return Point{x: x, y: y}
+}
+```
+
+You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:VOX001`:
+
+```go
+//godddlint:valueObject
+type Point struct {
+  //godddlint:disable:VOX001
+  x, y int
+}
+
+func New(x, y int) Point {
+  return Point{x: x, y: y}
 }
 ```
 

@@ -22,7 +22,9 @@ type (
 		ruleEnableChecker model.RuleEnablerChecker
 	}
 	// Rule that checks that value objects have constructor(s) and unexported fields.
-	immutable struct{}
+	immutable struct {
+		ruleEnableChecker model.RuleEnablerChecker
+	}
 	// Rule that checks that map/slices are defensively copied.
 	defensiveCopy struct{}
 )
@@ -35,7 +37,7 @@ func (r nonPointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
 	allDiag := make([]analysis.Diagnostic, 0)
 
 	for _, m := range d.Methods {
-		if astutils.CommentHasPrefix(m.Doc, "//goddlint:disable:VO001") {
+		if astutils.CommentHasPrefix(m.Doc, "//godddlint:disable:VO001") {
 			continue
 		}
 
@@ -55,15 +57,15 @@ func (r nonPointerReceivers) Apply(d *model.Definition) []analysis.Diagnostic {
 	return allDiag
 }
 
-func (r nonPointerReceivers) IsEnabled(doc *ast.CommentGroup) bool {
-	return r.ruleEnableChecker.IsEnabled(doc)
-}
-
 func (r nonPointerReceivers) Metadata() rules.RuleMetadata {
 	return rules.NonPointerReceivers
 }
 
 func (r immutable) Apply(d *model.Definition) []analysis.Diagnostic {
+	if !r.ruleEnableChecker.IsEnabled(d.Doc) {
+		return nil
+	}
+
 	allDiag := make([]analysis.Diagnostic, 0)
 
 	metadata := r.Metadata()
@@ -82,6 +84,10 @@ func (r immutable) Apply(d *model.Definition) []analysis.Diagnostic {
 
 		for _, f := range st.Fields.List {
 			for _, n := range f.Names {
+				if !r.ruleEnableChecker.IsEnabled(f.Doc) {
+					return nil
+				}
+
 				if n.IsExported() {
 					diag := analysis.Diagnostic{
 						Pos:      n.Pos(),

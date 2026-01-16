@@ -13,7 +13,9 @@ func NewRuleChecker() model.RuleChecker {
 		nonPointerReceivers{
 			model.CommentRuleEnabler{RuleCode: rules.NonPointerReceivers.Code},
 		},
-		immutable{},
+		immutable{
+			model.CommentRuleEnabler{RuleCode: rules.Immutable.Code},
+		},
 		defensiveCopy{},
 	})
 }

@@ -1,7 +1,7 @@
 package simple
 
 //godddlint:valueObject
-//goddlint:disable:VO001
+//godddlint:disable:VO001
 type NonPointerReceiverDisabledStructLevel struct {
 	x, y int
 }
@@ -23,7 +23,7 @@ func NewNonPointerReceiverDisabledMethodLevel() NonPointerReceiverDisabledMethod
 	return NonPointerReceiverDisabledMethodLevel{}
 }
 
-//goddlint:disable:VO001
+//godddlint:disable:VO001
 func (p *NonPointerReceiverDisabledMethodLevel) X() int {
 	return p.x
 }

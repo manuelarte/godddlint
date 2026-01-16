@@ -31,7 +31,7 @@ type (
 
 func (rec CommentRuleEnabler) IsEnabled(n ast.Node) bool {
 	if doc, ok := n.(*ast.CommentGroup); ok {
-		return !astutils.CommentHasPrefix(doc, fmt.Sprintf("//goddlint:disable:%s", rec.RuleCode))
+		return !astutils.CommentHasPrefix(doc, fmt.Sprintf("//godddlint:disable:%s", rec.RuleCode))
 	}
 
 	return true
