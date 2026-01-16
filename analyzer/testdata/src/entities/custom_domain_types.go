@@ -4,11 +4,11 @@ import "fmt"
 
 //godddlint:entity
 type User2 struct {
-	Id      int    // want `E003: Prefer custom domain types to primitives`
-	Name    string // want `E003: Prefer custom domain types to primitives`
-	Surname string // want `E003: Prefer custom domain types to primitives`
+	id      int    // want `E003: Prefer custom domain types to primitives`
+	name    string // want `E003: Prefer custom domain types to primitives`
+	surname string // want `E003: Prefer custom domain types to primitives`
 }
 
 func (u User2) FullName() string { // want `E001: Entity's method not using pointer receiver`
-	return fmt.Sprintf("%s %s", u.Name, u.Surname)
+	return fmt.Sprintf("%s %s", u.name, u.surname)
 }

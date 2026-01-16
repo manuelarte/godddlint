@@ -24,5 +24,6 @@ format-code: tidy ## Format go code and run the fixer
 .PHONY: format-code
 
 lint:
+	markdownlint-cli2 ./**/*.md --fix
 	golangci-lint run --fix ./...
 .PHONY: lint

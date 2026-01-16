@@ -49,6 +49,8 @@ type User struct {
 func (c *User) ...
 ```
 
+You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:E002`:
+
 ##### E003: Custom Domain Types Over Primitives
 
 An `Entity` field needs to have more meaning than just a primitive value.
@@ -88,6 +90,8 @@ type User struct {
 </tbody>
 </table>
 
+You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:E003`:
+
 ##### E004: Use Custom Domain Errors
 
 Business processes that can return an error need to return a meaningful error, not a generic one.
@@ -126,9 +130,12 @@ func (c *User) AddAddress(na Address) error {
 </tbody>
 </table>
 
+You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:E004`:
+
 ##### E005: Unexported Fields
 
-Entity fields need to be mutated by a method that indicates a business process. Not by just changing the field.
+Entity fields need to be mutated by a method that indicates a business process.
+Not by just changing the field.
 
 <table>
 <thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
@@ -166,6 +173,19 @@ func (c *User) UserMoved(na Address) {
 </tbody>
 </table>
 
+You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:E005`:
+
+```go
+//godddlint:entity
+//godddlint:disable:E005
+type User struct {
+  id      UserID
+  //godddlint:disable:E005
+  name    Name
+  address Address
+}
+```
+
 ### Value Objects
 
 [Value Objects][value-object] are objects that are equal due to the value of their properties.
@@ -186,6 +206,18 @@ type Point struct {
 func (c *Point) ...
 ```
 
+You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:VO001`:
+
+```go
+//godddlint:valueObject
+type Point struct {
+    x, y int
+}
+
+//godddlint:disable:VO001
+func (c *Point) ...
+```
+
 ##### VOX001: Immutable
 
 A value object makes sense when the properties are immutable.
@@ -201,6 +233,20 @@ type Point struct {
 
 func New(x, y int) Point {
     return Point{x: x, y: y}
+}
+```
+
+You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:VOX001`:
+
+```go
+//godddlint:valueObject
+type Point struct {
+  //godddlint:disable:VOX001
+  x, y int
+}
+
+func New(x, y int) Point {
+  return Point{x: x, y: y}
 }
 ```
 
