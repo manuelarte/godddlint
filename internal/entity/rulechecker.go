@@ -5,14 +5,23 @@ import (
 
 	"github.com/manuelarte/godddlint/internal/astutils"
 	"github.com/manuelarte/godddlint/internal/model"
+	"github.com/manuelarte/godddlint/rules"
 )
 
 func NewRuleChecker() model.RuleChecker {
 	return model.NewRuleChecker([]model.Rule{
-		pointerReceivers{},
-		customTypesOverPrimitives{},
-		customDomainErrors{},
-		unexportedFields{},
+		pointerReceivers{
+			model.CommentRuleEnabler{RuleCode: rules.PointerReceivers.Code},
+		},
+		customTypesOverPrimitives{
+			model.CommentRuleEnabler{RuleCode: rules.CustomTypesOverPrimitives.Code},
+		},
+		customDomainErrors{
+			model.CommentRuleEnabler{RuleCode: rules.CustomDomainErrors.Code},
+		},
+		unexportedFields{
+			model.CommentRuleEnabler{RuleCode: rules.UnexportedFields.Code},
+		},
 	})
 }
 

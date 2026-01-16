@@ -26,6 +26,10 @@ func TestAnalyzer(t *testing.T) {
 			desc:     "entities",
 			patterns: "entities",
 		},
+		{
+			desc:     "entities disable rules",
+			patterns: "entities-disable-rules",
+		},
 	}
 
 	for _, test := range testCases {

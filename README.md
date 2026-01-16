@@ -49,6 +49,8 @@ type User struct {
 func (c *User) ...
 ```
 
+You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:E002`:
+
 ##### E003: Custom Domain Types Over Primitives
 
 An `Entity` field needs to have more meaning than just a primitive value.
@@ -88,6 +90,8 @@ type User struct {
 </tbody>
 </table>
 
+You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:E003`:
+
 ##### E004: Use Custom Domain Errors
 
 Business processes that can return an error need to return a meaningful error, not a generic one.
@@ -125,6 +129,8 @@ func (c *User) AddAddress(na Address) error {
 
 </tbody>
 </table>
+
+You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:E004`:
 
 ##### E005: Unexported Fields
 
@@ -166,6 +172,19 @@ func (c *User) UserMoved(na Address) {
 
 </tbody>
 </table>
+
+You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:E005`:
+
+```go
+//godddlint:entity
+//godddlint:disable:E005
+type User struct {
+  id      UserID
+  //godddlint:disable:E005
+  name    Name
+  address Address
+}
+```
 
 ### Value Objects
 
