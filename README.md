@@ -195,7 +195,7 @@ type Point struct {
     x, y int
 }
 
-//goddlint:disable:VO001
+//godddlint:disable:VO001
 func (c *Point) ...
 ```
 
