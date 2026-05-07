@@ -4,7 +4,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/manuelarte/godddlint)](https://goreportcard.com/report/github.com/manuelarte/godddlint)
 ![version](https://img.shields.io/github/v/release/manuelarte/godddlint)
 
-Go DDD Lint is an opinionated linter that checks for some of the properties a DDD model should achieve.
+Go DDD Lint is an opinionated linter that checks for some of the properties a
+[Domain Driven Design][ddd] (DDD) model should achieve.
 
 ## ⬇️  Getting Started
 
@@ -29,13 +30,13 @@ An [entity][entity] is an object defined not by its attributes, but its identity
 
 #### Entities Rules
 
-##### E001: ID is the first embedded field
+##### E001: ID is the first field
 
 TODO
 
 ##### E002: Pointer Receivers
 
-An `Entity` can mutate, so then an internal mutation is allowed.
+An `Entity` can mutate, so then the struct needs to have pointer receivers.
 
 ```go
 //godddlint:entity
@@ -53,7 +54,7 @@ You can disable this rule at struct level, but also at method level by adding a 
 
 ##### E003: Custom Domain Types Over Primitives
 
-An `Entity` field needs to have more meaning than just a primitive value.
+An `Entity` field needs to have more meaning than just a primitive type.
 
 <table>
 <thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
@@ -72,9 +73,12 @@ type User struct {
 </td><td>
 
 ```go
-type UserID int
-type Name string
-type Address string
+type (
+  UserID int
+  Name string
+  Address string
+)
+
 
 //godddlint:entity
 type User struct {
@@ -104,7 +108,7 @@ Business processes that can return an error need to return a meaningful error, n
 ```go
 func (c *User) AddAddress(na Address) error {
   if len(c.addresses) >= 2 {
-    return errors.New("max number of moves reached")
+    return errors.New("max number of addresses reached")
   }
   c.addresses = append(c.addresses, na)
   return nil
@@ -117,7 +121,7 @@ func (c *User) AddAddress(na Address) error {
 ```go
 func (c *User) AddAddress(na Address) error {
   if len(c.addresses) >= 2 {
-    return UserNotAllowedToMoveError{}
+    return MaxNumberOfAddressesError{}
   }
   c.addresses = append(c.addresses, na)
   return nil
@@ -134,8 +138,8 @@ You can disable this rule at struct level, but also at method level by adding a 
 
 ##### E005: Unexported Fields
 
-Entity fields need to be mutated by a method that indicates a business process.
-Not by just changing the field.
+Entity fields need to be mutated by a method that has a business meaning.
+Not just by changing the field.
 
 <table>
 <thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
@@ -162,7 +166,7 @@ type User struct {
   address Address
 }
 
-func (c *User) UserMoved(na Address) {
+func (c *User) MovedTo(na Address) {
   c.address = na
 }
 ...
@@ -180,15 +184,15 @@ You can disable this rule at struct level, but also at field level by adding a d
 //godddlint:disable:E005
 type User struct {
   id      UserID
-  //godddlint:disable:E005
   name    Name
-  address Address
+  //godddlint:disable:E005
+  Address Address
 }
 ```
 
 ### Value Objects
 
-[Value Objects][value-object] are objects that are equal due to the value of their properties.
+[Value Objects][value-object] are objects that are defined by the value of their properties.
 
 #### Value Objects Rules
 
@@ -264,13 +268,13 @@ a struct, or a struct and an error, and starts with `New` or `Must`, e.g. `func 
 
 * Domain Error
 
-It is a Go error struct (struct that implements `Error() string`) but that gives a domain meaning to
-the error.
+It is a a struct that implements `Error() string`, but has a domain meaning.
 
 * Domain Struct
 
 A domain struct is a Go struct that represents a domain object.
 It can be an Aggregate, Entity or a Value Object.
 
+[ddd]: https://en.wikipedia.org/wiki/Domain-driven_design
 [entity]: https://en.wikipedia.org/wiki/Entity#In_computer_science
 [value-object]: https://en.wikipedia.org/wiki/Value_object
