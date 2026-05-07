@@ -17,7 +17,7 @@ func NewRuleChecker(rules []Rule) RuleChecker {
 }
 
 func (c RuleChecker) Check(definition *Definition) []analysis.Diagnostic {
-	allDiag := make([]analysis.Diagnostic, 0)
+	allDiag := make([]analysis.Diagnostic, 0, len(c.rules))
 
 	for _, r := range c.rules {
 		allDiag = append(allDiag, r.Apply(definition)...)
