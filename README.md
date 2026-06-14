@@ -34,8 +34,8 @@ Example of a `custom-gcl.yml` file that includes this linter:
 ```yaml
 version: v2.12.2
 plugins:
-  - module: "github.com/manuelarte/godddlint/plugin"
-    import: "github.com/manuelarte/godddlint"
+  - module: "github.com/manuelarte/godddlint"
+    import: "github.com/manuelarte/godddlint/plugin"
     version: v0.0.2
 ```
 
