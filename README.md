@@ -9,6 +9,8 @@ Go DDD Lint is an opinionated linter that checks for some of the properties a
 
 ## ⬇️  Getting Started
 
+### Run it as a standalone linter
+
 To install it, run:
 
 ```bash
@@ -20,6 +22,21 @@ and then run this linter in your project with:
 
 ```bash
 godddlint ./...
+```
+
+### Run it as a module plugin in golangci-lint
+
+You can integrate this linter with [golangci-lint](https://golangci-lint.run/)
+by using the [module plugin](https://golangci-lint.run/docs/plugins/module-plugins/).
+
+Example of a `custom-gcl.yml` file that includes this linter:
+
+```yaml
+version: v2.12.2
+plugins:
+  - module: "github.com/manuelarte/godddlint"
+    import: "github.com/manuelarte/godddlint/plugin"
+    version: v0.0.2
 ```
 
 ## 🚀 Features
