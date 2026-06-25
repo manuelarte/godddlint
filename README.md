@@ -7,6 +7,9 @@
 Go DDD Lint is an opinionated linter that checks for some of the properties a
 [Domain Driven Design][ddd] (DDD) model should achieve.
 
+Mark your [value object][value-object] structs with `//godddlint:valueObject` and your entities with `//godddlint:entity`
+and then run this linter.
+
 ## ⬇️  Getting Started
 
 ### Run it as a standalone linter
@@ -17,8 +20,7 @@ To install it, run:
 go install github.com/manuelarte/godddlint@latest
 ```
 
-Mark your [value object][value-object] structs with `//godddlint:valueObject` and your entities with `//godddlint:entity`
-and then run this linter in your project with:
+Then, you can run it in your project by executing:
 
 ```bash
 godddlint ./...
