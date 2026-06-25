@@ -4,8 +4,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/manuelarte/godddlint)](https://goreportcard.com/report/github.com/manuelarte/godddlint)
 ![version](https://img.shields.io/github/v/release/manuelarte/godddlint)
 
-Go DDD Lint is an opinionated linter that checks for some of the properties a
-[Domain Driven Design][ddd] (DDD) model should achieve.
+Go DDD Lint is an opinionated linter that checks some properties a
+[Domain-Driven Design][ddd] (DDD) model should achieve.
 
 Mark your [value object][value-object] structs with `//godddlint:valueObject` and your entities with `//godddlint:entity`
 and then run this linter.
@@ -31,7 +31,7 @@ godddlint ./...
 You can integrate this linter with [golangci-lint](https://golangci-lint.run/)
 by using the [module plugin](https://golangci-lint.run/docs/plugins/module-plugins/).
 
-Example of a `custom-gcl.yml` file that includes this linter:
+Example `custom-gcl.yml` with this module plugin:
 
 ```yaml
 version: v2.12.2
@@ -41,21 +41,42 @@ plugins:
     version: latest
 ```
 
+### Quick demo
+
+Annotate your domain struct and run the linter:
+
+```go
+//godddlint:entity
+type User struct {
+  id   string
+  Name string
+}
+```
+
+```bash
+godddlint ./...
+```
+
+Expected diagnostics look similar to:
+
+```text
+path/to/user.go:3:3: E003: Prefer custom domain types to primitives
+path/to/user.go:4:3: E005: Entity's field is exported
+```
+
 ## 🚀 Features
 
 ### Entities
 
 An [entity][entity] is an object defined not by its attributes, but its identity.
 
-#### Entities Rules
+#### Entity Rules
 
-##### E001: ID is the first field
+Current entity rule codes: `E001`, `E003`, `E004`, `E005`.
 
-TODO
+##### E001: Pointer Receivers
 
-##### E002: Pointer Receivers
-
-An `Entity` can mutate, so then the struct needs to have pointer receivers.
+An `Entity` can mutate, so its methods should use pointer receivers.
 
 ```go
 //godddlint:entity
@@ -69,11 +90,11 @@ type User struct {
 func (c *User) ...
 ```
 
-You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:E002`:
+You can disable this rule at struct level, and also at method level by adding `//godddlint:disable:E001`.
 
 ##### E003: Custom Domain Types Over Primitives
 
-An `Entity` field needs to have more meaning than just a primitive type.
+An `Entity` field should have domain meaning beyond a primitive type.
 
 <table>
 <thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
@@ -113,11 +134,11 @@ type User struct {
 </tbody>
 </table>
 
-You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:E003`:
+You can disable this rule at struct level, and also at field level by adding `//godddlint:disable:E003`.
 
 ##### E004: Use Custom Domain Errors
 
-Business processes that can return an error need to return a meaningful error, not a generic one.
+Business processes that can return an error should return a meaningful domain error, not a generic one.
 
 <table>
 <thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
@@ -153,12 +174,12 @@ func (c *User) AddAddress(na Address) error {
 </tbody>
 </table>
 
-You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:E004`:
+You can disable this rule at struct level, and also at method level by adding `//godddlint:disable:E004`.
 
 ##### E005: Unexported Fields
 
-Entity fields need to be mutated by a method that has a business meaning.
-Not just by changing the field.
+Entity fields should be mutated through methods with business meaning,
+not by changing fields directly.
 
 <table>
 <thead><tr><th>❌ Bad</th><th>✅ Good</th></tr></thead>
@@ -196,7 +217,7 @@ func (c *User) MovedTo(na Address) {
 </tbody>
 </table>
 
-You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:E005`:
+You can disable this rule at struct level, and also at field level by adding `//godddlint:disable:E005`.
 
 ```go
 //godddlint:entity
@@ -213,11 +234,13 @@ type User struct {
 
 [Value Objects][value-object] are objects that are defined by the value of their properties.
 
-#### Value Objects Rules
+#### Value Object Rules
+
+Current value object rule codes: `VO001`, `VOX001`, `VOX002`.
 
 ##### VO001: Non Pointer Receivers
 
-A value object is assumed to be immutable, so then no internal mutation is allowed.
+A value object is assumed to be immutable, so internal mutation should not be allowed.
 
 ```go
 //godddlint:valueObject
@@ -229,7 +252,7 @@ type Point struct {
 func (c *Point) ...
 ```
 
-You can disable this rule at struct level, but also at method level by adding a directive `//godddlint:disable:VO001`:
+You can disable this rule at struct level, and also at method level by adding `//godddlint:disable:VO001`.
 
 ```go
 //godddlint:valueObject
@@ -243,10 +266,8 @@ func (c *Point) ...
 
 ##### VOX001: Immutable
 
-A value object makes sense when the properties are immutable.
-This rule checks that a value object can only be created using a constructor that
-tries to prevent that developers mutate fields in the struct.
-Also checks that all the fields are unexported.
+A value object makes sense when its properties are immutable.
+This rule checks that a value object has a constructor and that all fields are unexported.
 
 ```go
 //godddlint:valueObject
@@ -259,7 +280,7 @@ func New(x, y int) Point {
 }
 ```
 
-You can disable this rule at struct level, but also at field level by adding a directive `//godddlint:disable:VOX001`:
+You can disable this rule at struct level, and also at field level by adding `//godddlint:disable:VOX001`.
 
 ```go
 //godddlint:valueObject
@@ -275,24 +296,24 @@ func New(x, y int) Point {
 
 #### VOX002: Maps/Slices Not Defensive Copied
 
-When using a `map` or a `slice` inside a value object, we should prevent that it gets mutated.
-To avoid that, you can use *Defensive Copy*.
+When using a `map` or a `slice` inside a value object, you should prevent external mutation.
+Use defensive copy in constructors and accessors.
 
 ## 📚 Glossary
 
-* Constructor
+- Constructor
 
-In Go there is no concept of a constructor, but normally a constructor is considered a function that returns
-a struct, or a struct and an error, and starts with `New` or `Must`, e.g. `func NewMyStruct(...) MyStruct`.
+In Go there is no constructor keyword, but in practice a constructor is a function that returns
+a struct (or struct + error) and starts with `New` or `Must`, for example `func NewMyStruct(...) MyStruct`.
 
-* Domain Error
+- Domain Error
 
-It is a a struct that implements `Error() string`, but has a domain meaning.
+It is a struct that implements `Error() string` and has domain meaning.
 
-* Domain Struct
+- Domain Struct
 
 A domain struct is a Go struct that represents a domain object.
-It can be an Aggregate, Entity or a Value Object.
+It can be an Aggregate, Entity, or Value Object.
 
 [ddd]: https://en.wikipedia.org/wiki/Domain-driven_design
 [entity]: https://en.wikipedia.org/wiki/Entity#In_computer_science
