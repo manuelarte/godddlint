@@ -1,7 +1,6 @@
 # 🧐 Go DDD Lint
 
 [![CI](https://github.com/manuelarte/godddlint/actions/workflows/ci.yml/badge.svg)](https://github.com/manuelarte/godddlint/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/manuelarte/godddlint)](https://goreportcard.com/report/github.com/manuelarte/godddlint)
 ![version](https://img.shields.io/github/v/release/manuelarte/godddlint)
 
 Go DDD Lint is an opinionated linter that checks some properties a
