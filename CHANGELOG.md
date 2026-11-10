@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.2](https://github.com/manuelarte/godddlint/compare/v0.0.1...v0.0.2) (2026-06-14)
+
+
+### Bug Fixes
+
+* add plugin support for golangci-lint ([#18](https://github.com/manuelarte/godddlint/issues/18)) ([c918716](https://github.com/manuelarte/godddlint/commit/c9187168c101157822722b3862d8106f677baded))
+
 ## 0.0.1 (2026-01-16)
 
 
